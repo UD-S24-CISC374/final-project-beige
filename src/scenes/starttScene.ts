@@ -6,6 +6,7 @@ export default class StartScene extends Phaser.Scene {
     fpsText: FpsText;
     // this will have a number corresponding to the speech bubble 'ID' and an object containing the speech bubble graphics to display
     bubbleData: object;
+    fileOpen: Phaser.Physics.Arcade.Sprite;
 
     constructor() {
         super({ key: "StartScene" });
@@ -33,11 +34,25 @@ export default class StartScene extends Phaser.Scene {
         // Add File Sound Effects
         let lockedsfx = this.sound.add("lockedfile");
 
+        //Add Animation Sprite
+        this.fileOpen = this.physics.add.sprite(400, 300, "open file");
+        this.fileOpen.alpha = 0;
+        this.fileOpen.setGravity(0, -300);
+        //Square is hidden
+        //When we click on a file
+        //Steal its x and y and give it to square
+        //Show square
+        //Move square to said x and y
+        //glide to wherever rn
+        //grow in size
+        //hide square
+
         // FILES
         // currently do nothing, should be spaced 100 pixels apart
 
         //Adds rectangle, does not work if above for some reason.
         const rectAnimation = this.add.graphics();
+
         //Create Locked Program which cannot be accessed
         const locked_prg = this.add
             .image(100, 100, "locked program")
@@ -62,18 +77,28 @@ export default class StartScene extends Phaser.Scene {
         locked_txt.on("pointerup", function () {
             locked_txt.clearTint();
         });
-        function openFile() {
-            rectAnimation.fillStyle(0xffff00, 1);
-            rectAnimation.fillRect(850, 20, 400, 400);
+
+        //Functions to openFiles
+        function openFile(
+            x: number,
+            y: number,
+            sprite: Phaser.Physics.Arcade.Sprite
+        ) {
+            sprite.x = x;
+            sprite.y = y;
+            sprite.alpha = 1;
+            sprite.depth = 1;
+            sprite.setVelocityX(900);
         }
+
         //Create Text File which CAN be accessed
         const txt1 = this.add.image(100, 200, "unlocked text").setInteractive();
         txt1.on("pointerdown", function () {
             txt1.setTint(0xaaaaff);
         });
-        txt1.on("pointerup", function () {
+        txt1.on("pointerup", () => {
             txt1.clearTint();
-            openFile();
+            openFile(100, 200, this.fileOpen);
         });
         // SPEECH
         // switch cases are used to determine which speech bubble to display/destory
@@ -215,6 +240,18 @@ export default class StartScene extends Phaser.Scene {
     }
 
     update() {
-        //this.fpsText.update();
+        if (this.fileOpen.x > 1000) {
+            this.fileOpen.setVelocity(0);
+            this.fileOpen.x = 999;
+            this.fileOpen.alpha = 0.99;
+        }
+        if (
+            this.fileOpen.x == 999 &&
+            this.fileOpen.alpha == 0.99 &&
+            this.fileOpen.scaleX < 10
+        ) {
+            this.fileOpen.scaleX++;
+            this.fileOpen.scaleY++;
+        }
     }
 }

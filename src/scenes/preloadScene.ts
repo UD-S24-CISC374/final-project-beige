@@ -13,6 +13,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("unlocked program", "assets/img/unlocked file.png");
         this.load.image("locked text", "assets/img/locked text file.png");
         this.load.image("unlocked text", "assets/img/unlocked text file.png");
+        this.load.image("open file", "assets/img/fileAnimation.png");
         this.load.audio("lockedfile", "assets/sounds/hitnoise.mp3");
     }
 
