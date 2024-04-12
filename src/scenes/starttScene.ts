@@ -111,6 +111,7 @@ export default class StartScene extends Phaser.Scene {
         let lockedsfx = this.sound.add("lockedfile");
         // Make CAT clickable
         this.CAT.setInteractive();
+        this.objectiveText = this.add.text(0,0,"");
         //Function for opening article rn
         function openFile() {
             let article1 = thisScene.add.sprite(1050,220,"article1").setInteractive().on("pointerdown",()=>{
@@ -447,6 +448,48 @@ export default class StartScene extends Phaser.Scene {
                 this.murderArticle = this.add.image(100,100,"unlocked program").setInteractive();
                 this.setObjective("Check out the program CAT unlocked!");
                 break;
+            case 13:
+                showBubble = this.createSpeechBubble(
+                    1060,
+                    400,
+                    200,
+                    100,
+                    "You can click the window again to close it."
+                );
+                // make the white bubble graphic visible
+                Object.values(showBubble)[0].visible = true;
+                // make the text object visible
+                Object.values(showBubble)[1].visible = true;
+                this.setObjective("Close the window.");
+                break;
+            case 14:
+                showBubble = this.createSpeechBubble(
+                    1060,
+                    400,
+                    200,
+                    100,
+                    "You can use ls, cat, and unzip too! Try it out!"
+                );
+                // make the white bubble graphic visible
+                Object.values(showBubble)[0].visible = true;
+                // make the text object visible
+                Object.values(showBubble)[1].visible = true;
+                this.setObjective("Explore the terminal for the alpha!");
+                break;
+            case 15:
+                showBubble = this.createSpeechBubble(
+                    1060,
+                    400,
+                    200,
+                    100,
+                    "Thank you for playing our alpha!"
+                );
+                // make the white bubble graphic visible
+                Object.values(showBubble)[0].visible = true;
+                // make the text object visible
+                Object.values(showBubble)[1].visible = true;
+                this.setObjective(":3");
+                break;
         }
         bubbleNum = bubbleNum + 1;
         this.bubbleData = { bubbleNum, showBubble };
@@ -640,6 +683,7 @@ export default class StartScene extends Phaser.Scene {
     }
 
     setObjective(objective:string){
+        this.objectiveText.destroy();
         this.objectiveText = this.add.text(805, 700, "Objective: " + objective, {backgroundColor:"#000", fontSize: "17px"});
     }
 
