@@ -1,6 +1,7 @@
 import * as cowsay from "cowsay";
 import Phaser from "phaser";
 import FpsText from "../objects/fpsText";
+import TextFile from "../objects/textFile";
 // CODE FOR createSpeechBubbles() HEAVILY REFERENCED FROM HERE: https://github.com/phaserjs/examples/blob/master/public/src/game%20objects/text/speech%20bubble.js
 
 export default class StartScene extends Phaser.Scene {
@@ -19,15 +20,23 @@ export default class StartScene extends Phaser.Scene {
     }
 
     create() {
+        //Adding scene variable for passing in scene to objects
+        var thisScene = this;
         // dummy data to avoid undefined error on first use of cycleDialogue()
         this.bubbleData = { bubbleNum: 0, showBubble: {} };
-
         // Spawn in the background and CAT image
         this.add.image(400, 300, "desktopBG");
         this.CAT = this.add.sprite(1100, 600, "CAT");
-
+        // Add File Sound Effects
+        let lockedsfx = this.sound.add("lockedfile");
         // Make CAT clickable
         this.CAT.setInteractive();
+        //Function for opening article rn
+        function openFile() {
+            let article1 = thisScene.add.sprite(1050,220,"article1").setInteractive().on("pointerdown",()=>{
+                article1.destroy()
+            });
+        }
 
         // when clicked, cycle dialogue + open some files
         this.input.on(
@@ -59,14 +68,10 @@ export default class StartScene extends Phaser.Scene {
                 }
         });
 
-        // Add File Sound Effects
-        let lockedsfx = this.sound.add("lockedfile");
 
         // FILES
         // currently do nothing, should be spaced 100 pixels apart
 
-        //Adds rectangle, does not work if above for some reason.
-        const rectAnimation = this.add.graphics();
         //Create Locked Program which cannot be accessed
         this.murderArticle = this.add
             .image(100, 100, "locked program")
@@ -88,19 +93,18 @@ export default class StartScene extends Phaser.Scene {
             locked_txt.clearTint();
         });
 
-        function openFile() {
-            rectAnimation.fillStyle(0xffff00, 1);
-            rectAnimation.fillRect(850, 20, 400, 400);
+        function makeTxtFile(text: string) {
+            new TextFile(thisScene,text,680,300);
         }
-
         //Create Text File which CAN be accessed
         const txt1 = this.add.image(100, 200, "unlocked text").setInteractive();
         txt1.on("pointerdown", function () {
             txt1.setTint(0xaaaaff);
         });
-        txt1.on("pointerup", function () {
+        txt1.on("pointerup", () => {
             txt1.clearTint();
-            openFile();
+            //Below once text is actually defined somewhere we can pull from there for each text file
+            makeTxtFile("While I start developing the hack, here are some commands to get you up to speed.\nI know you're not the most experienced but these shouldn't be too hard to understand.\n\necho <TEXT>: Have the terminal 'say' the TEXT\n\ncd <DIRECTORY>: Navigate to a new directory with new files!\n\ncat <FILE>: Read this FILE in the terminal!");
         });
         // SPEECH
         // switch cases are used to determine which speech bubble to display/destory
