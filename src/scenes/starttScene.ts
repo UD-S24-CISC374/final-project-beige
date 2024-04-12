@@ -95,6 +95,7 @@ export default class StartScene extends Phaser.Scene {
     objectiveText: Phaser.GameObjects.Text;
     // this is the first locked program
     murderArticle: Phaser.GameObjects.Image;
+    fileDepth: number = 0;
 
     constructor() {
         super({ key: "StartScene" });

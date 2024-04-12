@@ -38,5 +38,14 @@ export default class TextFile {
                 this.button.y = this.text.y;
             },
         );
+        this.text.on("pointerdown", () => {
+            this.text.depth = 1;
+            this.button.depth = 1;
+        });
+
+        this.text.on("pointerup", () => {
+            this.text.depth = 0;
+            this.button.depth = 0;
+        });
     }
 }

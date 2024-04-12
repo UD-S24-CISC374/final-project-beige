@@ -28,5 +28,14 @@ export default class ProgramFile {
                 this.button.y = dragY - this.image.height / 2;
             },
         );
+        this.image.on("pointerdown", () => {
+            this.image.depth = 1;
+            this.button.depth = 1;
+        });
+
+        this.image.on("pointerup", () => {
+            this.image.depth = 0;
+            this.button.depth = 0;
+        });
     }
 }
