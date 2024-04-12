@@ -115,10 +115,20 @@ export default class StartScene extends Phaser.Scene {
         this.objectiveText = this.add.text(0, 0, "");
         //Function for opening article rn
         function makeTxtFile(text: string) {
-            new TextFile(thisScene, text, 680, 300);
+            new TextFile(
+                thisScene,
+                text,
+                Math.floor(Math.random() * (1000 - 600 + 1)) + 600,
+                Math.floor(Math.random() * (500 - 20 + 1)) + 20,
+            );
         }
         function makeProgramFile(text: string) {
-            new TextFile(thisScene, text, 1080, 300);
+            new ProgramFile(
+                thisScene,
+                text,
+                Math.floor(Math.random() * (1100 - 600 + 1)) + 600,
+                Math.floor(Math.random() * (520 - 220 + 1)) + 220,
+            );
         }
 
         // when clicked, cycle dialogue + open some files
