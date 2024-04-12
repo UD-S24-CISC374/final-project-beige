@@ -1,14 +1,94 @@
 import * as cowsay from "cowsay";
 import Phaser from "phaser";
-import FpsText from "../objects/fpsText";
 import TextFile from "../objects/textFile";
 // CODE FOR createSpeechBubbles() HEAVILY REFERENCED FROM HERE: https://github.com/phaserjs/examples/blob/master/public/src/game%20objects/text/speech%20bubble.js
 
+// FILESYSTEM CODE BEGIN -----
+type CatFile = {
+    type: 'file',
+    contents: string,
+};
+
+type CatZip = {
+    type: 'zip',
+    extracted: boolean,
+    contents: {
+        [childName: string]: CatFile,
+    },
+};
+
+type CatDir = {
+    parent?: string | undefined,
+    type: 'dir',
+    contents: {
+        [childName: string]: CatFile | CatZip | CatDir,
+    },
+};
+
+type CatEntry = CatDir | CatZip | CatFile;
+
+const THE_ENTIRE_DAMN_CAT_FILESYSTEM: CatDir = {
+    type: 'dir',
+    contents: {
+        'dir1': {
+            type: 'dir',
+            contents: {
+                'file2.txt': {
+                    type: 'file',
+                    contents: 'FILE CONTENTS GO HERE (2)',
+                },
+                'dir2.zip': {
+                    type: 'zip',
+                    extracted: false,
+                    contents: {
+                        'file3.txt': {
+                            type: 'file',
+                            contents: 'FILE CONTENTS GO HERE (3)',
+                        },
+                    },
+                },
+            },
+        },
+        'file1.txt': {
+            type: 'file',
+            contents: 'FILE CONTENTS GO HERE (1)',
+        },
+    },
+};
+
+const fsListItemsInZip = (zip: CatZip): {[name: string]: CatFile} => {
+    const out: {[name: string]: CatFile} = {};
+    for (const [fileName, item] of Object.entries(zip.contents)) {
+        out[fileName] = item;
+    }
+    return out;
+};
+
+const fsListItemsInDirectory = (dir: CatDir): {[name: string]: CatEntry} => {
+    const out: {[name: string]: CatEntry} = {};
+    for (const [itemName, item] of Object.entries(dir.contents)) {
+        if (item.type === 'zip' && item.extracted) {
+            const zipContents = fsListItemsInZip(item);
+            for (const [fileName, file] of Object.entries(zipContents)) {
+                out[fileName] = file;
+            }
+        } else {
+            out[itemName] = item;
+        }
+    }
+    return out;
+};
+
+const fsExtractZip = (zip: CatZip) => {
+    zip.extracted = true;
+};
+// FILESYSTEM CODE END -----
+
 export default class StartScene extends Phaser.Scene {
-    fpsText: FpsText;
     // this will have a number corresponding to the speech bubble 'ID' and an object containing the speech bubble graphics to display
     bubbleData: object;
     lastCommandRun: string;
+    currentDirectory: CatDir;
     CAT: Phaser.GameObjects.Sprite;
     // this is the objective
     objectiveText: Phaser.GameObjects.Text;
@@ -155,9 +235,11 @@ export default class StartScene extends Phaser.Scene {
         terminalHistoryParent.style.display = 'inline';
         terminalHistoryParent.innerHTML = '<p id="terminal-history" style="white-space: pre-wrap"></p>';
         // -- Background
-        this.add.rectangle(terminalWidth / 2 + 8, 720 - terminalHeight / 2, terminalWidth + 16, terminalHeight, 0x000000, 0x40);
+        this.add.rectangle(terminalWidth / 2 + 12, 720 - terminalHeight / 2, terminalWidth + 24, terminalHeight, 0x000000, 0x40);
         this.add.dom(terminalWidth / 2 + 22, 720 - terminalHeight / 2, terminalHistoryParent);
         this.add.dom(terminalWidth / 2 + 8, 720 - terminalInputHeight / 2, terminalInput);
+        // -- Finalize
+        this.currentDirectory = THE_ENTIRE_DAMN_CAT_FILESYSTEM;
     }
 
     // for opening file animation
@@ -461,26 +543,100 @@ export default class StartScene extends Phaser.Scene {
         // CAT checks this to see if it's right
         this.lastCommandRun = text;
 
-        const command = text.split(' ')[0];
+        // todo: need to improve output
+        const addOutput = (output: string) => {
+            terminalHistory.innerHTML = output.trim();
+        };
+
+        // todo: need to move command code to different functions, they're fine here for now
+        const commandParts = text.split(' ');
+        for (let commandPart of commandParts) {
+            commandPart = commandPart.trim();
+        }
+        const command = commandParts[0];
         switch (command) {
+            case 'clear': {
+                addOutput('');
+                return;
+            }
+            case 'ls': {
+                let output = '';
+                for (const [name, item] of Object.entries(fsListItemsInDirectory(this.currentDirectory))) {
+                    let colorClass: string;
+                    switch (item.type) {
+                        case 'file': colorClass = 'terminal-span-file-color'; break;
+                        case 'zip':  colorClass = 'terminal-span-zip-color';  break;
+                        case 'dir':  colorClass = 'terminal-span-dir-color';  break;
+                    }
+                    output += `<span class="${colorClass}">${name}</span>\n`;
+                }
+                addOutput(output);
+                return;
+            }
+            case 'unzip': {
+                if (commandParts.length <= 1) {
+                    addOutput('Command "unzip" needs to know what zip file you want to unzip.');
+                    return;
+                }
+                for (const [name, item] of Object.entries(fsListItemsInDirectory(this.currentDirectory))) {
+                    if (name === commandParts[1] && item.type === 'zip') {
+                        fsExtractZip(item);
+                        addOutput(`Successfully unzipped file called "${name}"!`);
+                        return;
+                    }
+                }
+                addOutput(`Command "unzip" could not find a zip file called "${commandParts[1]}".`);
+                return;
+            }
+            case 'cat': {
+                if (commandParts.length <= 1) {
+                    addOutput('Command "cat" needs to know what file you want to read.');
+                    return;
+                }
+                for (const [name, item] of Object.entries(fsListItemsInDirectory(this.currentDirectory))) {
+                    if (name === commandParts[1] && item.type === 'file') {
+                        addOutput(item.contents);
+                        return;
+                    }
+                }
+                addOutput(`Command "cat" could not find a file called "${commandParts[1]}".`);
+                return;
+            }
+            case 'cd': {
+                // todo: this is dependent on the fs being how it is, delete this code and rewrite it asap
+                // this gives "remove before E3 2003" source engine comment vibes
+                if (this.currentDirectory === THE_ENTIRE_DAMN_CAT_FILESYSTEM && commandParts[1] == 'dir1') {
+                    const dir1 = THE_ENTIRE_DAMN_CAT_FILESYSTEM.contents['dir1'];
+                    if (dir1.type !== 'dir') {
+                        // will never happen
+                        return;
+                    }
+                    this.currentDirectory = dir1;
+                    addOutput('Set current directory to "/dir1/".');
+                } else if (this.currentDirectory === THE_ENTIRE_DAMN_CAT_FILESYSTEM.contents['dir1'] && commandParts[1] == '..') {
+                    this.currentDirectory = THE_ENTIRE_DAMN_CAT_FILESYSTEM;
+                    addOutput('Set current directory to "/".');
+                } else {
+                    addOutput(`Could not change directory: directory "${commandParts[1]}" doesn't exist.`);
+                }
+                return;
+            }
             case 'echo': {
-                // todo: need to move command code to different functions, they're fine here for now
-                terminalHistory.innerText = text.substring(4).trim();
+                addOutput(text.substring(4));
                 return;
             }
             case 'cowsay': {
-                terminalHistory.innerText = cowsay.say({
+                addOutput(cowsay.say({
                     text: text.substring(6).trim(),
                     //f: 'kitty',
-                });
+                }));
                 return;
             }
             default: {
-                terminalHistory.innerText = 'Unknown command.';
+                addOutput(`Unknown command "${command}".`);
                 return;
             }
         }
-
     }
 
     setObjective(objective:string){
