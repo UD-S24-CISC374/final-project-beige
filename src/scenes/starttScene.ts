@@ -155,7 +155,7 @@ export default class StartScene extends Phaser.Scene {
         terminalHistoryParent.style.display = 'inline';
         terminalHistoryParent.innerHTML = '<p id="terminal-history" style="white-space: pre-wrap"></p>';
         // -- Background
-        this.add.rectangle(terminalWidth / 2 + 8, 720 - terminalHeight / 2, terminalWidth + 16, terminalHeight, 0x000000, 0x40);
+        this.add.rectangle(terminalWidth / 2 + 12, 720 - terminalHeight / 2, terminalWidth + 24, terminalHeight, 0x000000, 0x40);
         this.add.dom(terminalWidth / 2 + 22, 720 - terminalHeight / 2, terminalHistoryParent);
         this.add.dom(terminalWidth / 2 + 8, 720 - terminalInputHeight / 2, terminalInput);
     }
