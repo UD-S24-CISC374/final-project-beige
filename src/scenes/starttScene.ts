@@ -493,7 +493,7 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "You can click the window again to close it.",
+                    "You can click the x on windows to close them!",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
