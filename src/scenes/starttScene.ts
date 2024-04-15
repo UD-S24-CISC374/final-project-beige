@@ -5,69 +5,69 @@ import TextFile from "../objects/textFile";
 
 // FILESYSTEM CODE BEGIN -----
 type CatFile = {
-    type: 'file',
-    contents: string,
+    type: "file";
+    contents: string;
 };
 
 type CatZip = {
-    type: 'zip',
-    extracted: boolean,
+    type: "zip";
+    extracted: boolean;
     contents: {
-        [childName: string]: CatFile,
-    },
+        [childName: string]: CatFile;
+    };
 };
 
 type CatDir = {
-    parent?: string | undefined,
-    type: 'dir',
+    parent?: string | undefined;
+    type: "dir";
     contents: {
-        [childName: string]: CatFile | CatZip | CatDir,
-    },
+        [childName: string]: CatFile | CatZip | CatDir;
+    };
 };
 
 type CatEntry = CatDir | CatZip | CatFile;
 
 const THE_ENTIRE_DAMN_CAT_FILESYSTEM: CatDir = {
-    type: 'dir',
+    type: "dir",
     contents: {
-        'dir1': {
-            type: 'dir',
+        dir1: {
+            type: "dir",
             contents: {
-                'file2.txt': {
-                    type: 'file',
-                    contents: 'FILE CONTENTS GO HERE (2)',
+                "file2.txt": {
+                    type: "file",
+                    contents: "FILE CONTENTS GO HERE (2)",
                 },
-                'dir2.zip': {
-                    type: 'zip',
+                "dir2.zip": {
+                    type: "zip",
                     extracted: false,
                     contents: {
-                        'file3.txt': {
-                            type: 'file',
-                            contents: 'FILE CONTENTS GO HERE (3)',
+                        "file3.txt": {
+                            type: "file",
+                            contents: "FILE CONTENTS GO HERE (3)",
                         },
                     },
                 },
             },
         },
-        'file1.txt': {
-            type: 'file',
-            contents: 'FILE CONTENTS GO HERE (1)',
+        "file1.txt": {
+            type: "file",
+            contents: "FILE CONTENTS GO HERE (1)",
         },
     },
 };
 
-const fsListItemsInZip = (zip: CatZip): {[name: string]: CatFile} => {
-    const out: {[name: string]: CatFile} = {};
+const fsListItemsInZip = (zip: CatZip): { [name: string]: CatFile } => {
+    const out: { [name: string]: CatFile } = {};
     for (const [fileName, item] of Object.entries(zip.contents)) {
         out[fileName] = item;
     }
     return out;
 };
 
-const fsListItemsInDirectory = (dir: CatDir): {[name: string]: CatEntry} => {
-    const out: {[name: string]: CatEntry} = {};
+const fsListItemsInDirectory = (dir: CatDir): { [name: string]: CatEntry } => {
+    const out: { [name: string]: CatEntry } = {};
     for (const [itemName, item] of Object.entries(dir.contents)) {
-        if (item.type === 'zip' && item.extracted) {
+        if (item.type === "zip" && item.extracted) {
             const zipContents = fsListItemsInZip(item);
             for (const [fileName, file] of Object.entries(zipContents)) {
                 out[fileName] = file;
@@ -111,12 +111,15 @@ export default class StartScene extends Phaser.Scene {
         let lockedsfx = this.sound.add("lockedfile");
         // Make CAT clickable
         this.CAT.setInteractive();
-        this.objectiveText = this.add.text(0,0,"");
+        this.objectiveText = this.add.text(0, 0, "");
         //Function for opening article rn
         function openFile() {
-            let article1 = thisScene.add.sprite(1050,220,"article1").setInteractive().on("pointerdown",()=>{
-                article1.destroy()
-            });
+            let article1 = thisScene.add
+                .sprite(1050, 220, "article1")
+                .setInteractive()
+                .on("pointerdown", () => {
+                    article1.destroy();
+                });
         }
 
         // when clicked, cycle dialogue + open some files
@@ -124,31 +127,40 @@ export default class StartScene extends Phaser.Scene {
             "pointerdown",
             (
                 pointer: Phaser.Input.Pointer, // we don't use the pointer param but if we don't include it it returns a pointer manager instead ugh
-                objectsClicked: Phaser.GameObjects.Sprite[]
+                objectsClicked: Phaser.GameObjects.Sprite[],
             ) => {
                 // THIS IS FOR DEBUGGING
                 // if a something without a texture is clicked then the console log will cause an error, keep the if-statement for safety
-                if(objectsClicked.length > 0){
+                if (objectsClicked.length > 0) {
                     console.log(objectsClicked[0].texture.key);
-                }else{
+                } else {
                     console.log("Nothing was clicked");
                 }
                 // CYCLE DIALOGUE HERE
-                if (objectsClicked.length > 0 && objectsClicked[0].texture.key == "CAT") {
+                if (
+                    objectsClicked.length > 0 &&
+                    objectsClicked[0].texture.key == "CAT"
+                ) {
                     this.cycleDialogue(
-                Object.values(this.bubbleData)[0],
-                Object.values(this.bubbleData)[1]
-                );
-                // CHECK FOR UNLOCKED FILES HERE
-                }else if(objectsClicked.length > 0 && objectsClicked[0].texture.key == "unlocked program"){
+                        Object.values(this.bubbleData)[0],
+                        Object.values(this.bubbleData)[1],
+                    );
+                    // CHECK FOR UNLOCKED FILES HERE
+                } else if (
+                    objectsClicked.length > 0 &&
+                    objectsClicked[0].texture.key == "unlocked program"
+                ) {
                     this.murderArticle.clearTint();
                     openFile();
-                }else if(objectsClicked.length > 0 && objectsClicked[0].texture.key == "locked program"){
+                } else if (
+                    objectsClicked.length > 0 &&
+                    objectsClicked[0].texture.key == "locked program"
+                ) {
                     this.murderArticle.setTint(0xff6666);
                     lockedsfx.play();
                 }
-        });
-
+            },
+        );
 
         // FILES
         // currently do nothing, should be spaced 100 pixels apart
@@ -158,7 +170,7 @@ export default class StartScene extends Phaser.Scene {
             .image(100, 100, "locked program")
             .setInteractive();
 
-        this.murderArticle.on("pointerup",  () => {
+        this.murderArticle.on("pointerup", () => {
             this.murderArticle.clearTint();
         });
 
@@ -175,7 +187,7 @@ export default class StartScene extends Phaser.Scene {
         });
 
         function makeTxtFile(text: string) {
-            new TextFile(thisScene,text,680,300);
+            new TextFile(thisScene, text, 680, 300);
         }
         //Create Text File which CAN be accessed
         const txt1 = this.add.image(100, 200, "unlocked text").setInteractive();
@@ -185,13 +197,15 @@ export default class StartScene extends Phaser.Scene {
         txt1.on("pointerup", () => {
             txt1.clearTint();
             //Below once text is actually defined somewhere we can pull from there for each text file
-            makeTxtFile("While I start developing the hack, here are some commands to get you up to speed.\nI know you're not the most experienced but these shouldn't be too hard to understand.\n\necho <TEXT>: Have the terminal 'say' the TEXT\n\ncd <DIRECTORY>: Navigate to a new directory with new files!\n\ncat <FILE>: Read this FILE in the terminal!");
+            makeTxtFile(
+                "While I start developing the hack, here are some commands to get you up to speed.\nI know you're not the most experienced but these shouldn't be too hard to understand.\n\necho <TEXT>: Have the terminal 'say' the TEXT\n\ncd <DIRECTORY>: Navigate to a new directory with new files!\n\ncat <FILE>: Read this FILE in the terminal!",
+            );
         });
         // SPEECH
         // switch cases are used to determine which speech bubble to display/destory
         this.cycleDialogue(
             Object.values(this.bubbleData)[0],
-            Object.values(this.bubbleData)[1]
+            Object.values(this.bubbleData)[1],
         );
 
         // TERMINAL (0)
@@ -199,46 +213,63 @@ export default class StartScene extends Phaser.Scene {
         const terminalWidth = 1280 / 2;
         const terminalHeight = 400;
         const terminalInputHeight = 32;
-        const terminalFontSize = '1.2em';
+        const terminalFontSize = "1.2em";
         // -- Input
-        const terminalInput = document.createElement('input');
-        terminalInput.type = 'text';
-        terminalInput.style.outline = 'none';
-        terminalInput.style.border = 'none';
+        const terminalInput = document.createElement("input");
+        terminalInput.type = "text";
+        terminalInput.style.outline = "none";
+        terminalInput.style.border = "none";
         terminalInput.style.width = `${terminalWidth - 8}px`;
         terminalInput.style.height = `${terminalInputHeight}px`;
-        terminalInput.style.padding = '0px';
-        terminalInput.style.margin = '0px';
-        terminalInput.style.backgroundColor = '#0000';
-        terminalInput.style.color = '#fff';
-        terminalInput.className = 'jetbrains-mono-normal';
-        terminalInput.style.backgroundImage = 'url("assets/img/terminal prompt.png")';
-        terminalInput.style.backgroundPosition = '8px 8px';
-        terminalInput.style.backgroundRepeat = 'no-repeat';
-        terminalInput.style.backgroundSize = '16px';
-        terminalInput.style.paddingLeft = '28px';
+        terminalInput.style.padding = "0px";
+        terminalInput.style.margin = "0px";
+        terminalInput.style.backgroundColor = "#0000";
+        terminalInput.style.color = "#fff";
+        terminalInput.className = "jetbrains-mono-normal";
+        terminalInput.style.backgroundImage =
+            'url("assets/img/terminal prompt.png")';
+        terminalInput.style.backgroundPosition = "8px 8px";
+        terminalInput.style.backgroundRepeat = "no-repeat";
+        terminalInput.style.backgroundSize = "16px";
+        terminalInput.style.paddingLeft = "28px";
         terminalInput.style.fontSize = terminalFontSize;
         this.game.canvas.parentNode?.appendChild(terminalInput);
-        terminalInput.addEventListener('change', () => {
+        terminalInput.addEventListener("change", () => {
             this.parseCommand(terminalInput.value);
-            terminalInput.value = '';
+            terminalInput.value = "";
         });
         // -- Text
-        const terminalHistoryParent = document.createElement('div');
+        const terminalHistoryParent = document.createElement("div");
         terminalHistoryParent.style.width = `${terminalWidth - 8}px`;
         terminalHistoryParent.style.height = `${terminalHeight - terminalInputHeight}px`;
-        terminalHistoryParent.style.padding = '0px';
-        terminalHistoryParent.style.margin = '0px';
-        terminalHistoryParent.style.backgroundColor = '#0000';
-        terminalHistoryParent.style.color = '#fff';
-        terminalHistoryParent.className = 'jetbrains-mono-normal';
+        terminalHistoryParent.style.padding = "0px";
+        terminalHistoryParent.style.margin = "0px";
+        terminalHistoryParent.style.backgroundColor = "#0000";
+        terminalHistoryParent.style.color = "#fff";
+        terminalHistoryParent.className = "jetbrains-mono-normal";
         terminalHistoryParent.style.fontSize = terminalFontSize;
-        terminalHistoryParent.style.display = 'inline';
-        terminalHistoryParent.innerHTML = '<p id="terminal-history" style="white-space: pre-wrap"></p>';
+        terminalHistoryParent.style.display = "inline";
+        terminalHistoryParent.innerHTML =
+            '<p id="terminal-history" style="white-space: pre-wrap"></p>';
         // -- Background
-        this.add.rectangle(terminalWidth / 2 + 12, 720 - terminalHeight / 2, terminalWidth + 24, terminalHeight, 0x000000, 0x40);
-        this.add.dom(terminalWidth / 2 + 22, 720 - terminalHeight / 2, terminalHistoryParent);
-        this.add.dom(terminalWidth / 2 + 8, 720 - terminalInputHeight / 2, terminalInput);
+        this.add.rectangle(
+            terminalWidth / 2 + 12,
+            720 - terminalHeight / 2,
+            terminalWidth + 24,
+            terminalHeight,
+            0x000000,
+            0x40,
+        );
+        this.add.dom(
+            terminalWidth / 2 + 22,
+            720 - terminalHeight / 2,
+            terminalHistoryParent,
+        );
+        this.add.dom(
+            terminalWidth / 2 + 8,
+            720 - terminalInputHeight / 2,
+            terminalInput,
+        );
         // -- Finalize
         this.currentDirectory = THE_ENTIRE_DAMN_CAT_FILESYSTEM;
     }
@@ -261,7 +292,7 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "Oh finally, power! Hi! Click on me to continue."
+                    "Oh finally, power! Hi! Click on me to continue.",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
@@ -274,7 +305,7 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "You must be the IT person trying to fix this computer."
+                    "You must be the IT person trying to fix this computer.",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
@@ -287,7 +318,7 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "I don’t think it needs fixing, but, whatever."
+                    "I don’t think it needs fixing, but, whatever.",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
@@ -300,7 +331,7 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "See that black window over there?"
+                    "See that black window over there?",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
@@ -313,7 +344,7 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "You look like you don’t know what that is."
+                    "You look like you don’t know what that is.",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
@@ -326,7 +357,7 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "Weird since you’re like… an IT worker."
+                    "Weird since you’re like… an IT worker.",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
@@ -339,7 +370,7 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "But that’s okay; I’ll teach you."
+                    "But that’s okay; I’ll teach you.",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
@@ -352,7 +383,7 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "Open that text file over there. It’s white. With text on it."
+                    "Open that text file over there. It’s white. With text on it.",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
@@ -365,7 +396,7 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "Click me when you’re done reading it."
+                    "Click me when you’re done reading it.",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
@@ -379,7 +410,7 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "Got it? Good."
+                    "Got it? Good.",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
@@ -393,7 +424,7 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "Try making the terminal say “cat”. Go on, you’ve got it."
+                    "Try making the terminal say “cat”. Go on, you’ve got it.",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
@@ -403,25 +434,25 @@ export default class StartScene extends Phaser.Scene {
                 this.setObjective("Make the terminal say 'cat'!");
                 break;
             case 11:
-                if(this.lastCommandRun == "echo cat"){
+                if (this.lastCommandRun == "echo cat") {
                     showBubble = this.createSpeechBubble(
                         1060,
                         400,
                         200,
                         100,
-                        "Great start!"
+                        "Great start!",
                     );
                     // make the white bubble graphic visible
                     Object.values(showBubble)[0].visible = true;
                     // make the text object visible
                     Object.values(showBubble)[1].visible = true;
-                }else{
+                } else {
                     showBubble = this.createSpeechBubble(
                         1060,
                         400,
                         200,
                         100,
-                        "Um… maybe you should check out the text file again."
+                        "Um… maybe you should check out the text file again.",
                     );
                     // make the white bubble graphic visible
                     Object.values(showBubble)[0].visible = true;
@@ -437,59 +468,74 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "Now for the sake of the alpha, I'm going to unlock a file for you."
+                    "Okay, so now you can actually have that file show up in the terminal.",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
                 // make the text object visible
                 Object.values(showBubble)[1].visible = true;
-                // Unlock file here
-                this.murderArticle.destroy();
-                this.murderArticle = this.add.image(100,100,"unlocked program").setInteractive();
-                this.setObjective("Check out the program CAT unlocked!");
+                // add objective text under cat
+                this.setObjective("Make the terminal say 'cat'!");
                 break;
-            case 13:
-                showBubble = this.createSpeechBubble(
-                    1060,
-                    400,
-                    200,
-                    100,
-                    "You can click the window again to close it."
-                );
-                // make the white bubble graphic visible
-                Object.values(showBubble)[0].visible = true;
-                // make the text object visible
-                Object.values(showBubble)[1].visible = true;
-                this.setObjective("Close the window.");
-                break;
-            case 14:
-                showBubble = this.createSpeechBubble(
-                    1060,
-                    400,
-                    200,
-                    100,
-                    "You can use ls, cat, and unzip too! Try it out!"
-                );
-                // make the white bubble graphic visible
-                Object.values(showBubble)[0].visible = true;
-                // make the text object visible
-                Object.values(showBubble)[1].visible = true;
-                this.setObjective("Explore the terminal for the alpha!");
-                break;
-            case 15:
-                showBubble = this.createSpeechBubble(
-                    1060,
-                    400,
-                    200,
-                    100,
-                    "Thank you for playing our alpha!"
-                );
-                // make the white bubble graphic visible
-                Object.values(showBubble)[0].visible = true;
-                // make the text object visible
-                Object.values(showBubble)[1].visible = true;
-                this.setObjective(":3");
-                break;
+            // case 12:
+            //     showBubble = this.createSpeechBubble(
+            //         1060,
+            //         400,
+            //         200,
+            //         100,
+            //         "Now for the sake of the alpha, I'm going to unlock a file for you."
+            //     );
+            //     // make the white bubble graphic visible
+            //     Object.values(showBubble)[0].visible = true;
+            //     // make the text object visible
+            //     Object.values(showBubble)[1].visible = true;
+            //     // Unlock file here
+            //     this.murderArticle.destroy();
+            //     this.murderArticle = this.add.image(100,100,"unlocked program").setInteractive();
+            //     this.setObjective("Check out the program CAT unlocked!");
+            //     break;
+            // case 13:
+            //     showBubble = this.createSpeechBubble(
+            //         1060,
+            //         400,
+            //         200,
+            //         100,
+            //         "You can click the window again to close it."
+            //     );
+            //     // make the white bubble graphic visible
+            //     Object.values(showBubble)[0].visible = true;
+            //     // make the text object visible
+            //     Object.values(showBubble)[1].visible = true;
+            //     this.setObjective("Close the window.");
+            //     break;
+            // case 14:
+            //     showBubble = this.createSpeechBubble(
+            //         1060,
+            //         400,
+            //         200,
+            //         100,
+            //         "You can use ls, cat, and unzip too! Try it out!"
+            //     );
+            //     // make the white bubble graphic visible
+            //     Object.values(showBubble)[0].visible = true;
+            //     // make the text object visible
+            //     Object.values(showBubble)[1].visible = true;
+            //     this.setObjective("Explore the terminal for the alpha!");
+            //     break;
+            // case 15:
+            //     showBubble = this.createSpeechBubble(
+            //         1060,
+            //         400,
+            //         200,
+            //         100,
+            //         "Thank you for playing our alpha!"
+            //     );
+            //     // make the white bubble graphic visible
+            //     Object.values(showBubble)[0].visible = true;
+            //     // make the text object visible
+            //     Object.values(showBubble)[1].visible = true;
+            //     this.setObjective(":3");
+            //     break;
         }
         bubbleNum = bubbleNum + 1;
         this.bubbleData = { bubbleNum, showBubble };
@@ -501,7 +547,7 @@ export default class StartScene extends Phaser.Scene {
         y: number,
         width: number,
         height: number,
-        quote: string
+        quote: string,
     ) {
         const bubbleWidth = width;
         const bubbleHeight = height;
@@ -543,7 +589,7 @@ export default class StartScene extends Phaser.Scene {
             point2X,
             point2Y,
             point3X,
-            point3Y
+            point3Y,
         );
         bubble.lineStyle(2, 0x565656, 1);
         bubble.lineBetween(point2X, point2Y, point3X, point3Y);
@@ -561,7 +607,7 @@ export default class StartScene extends Phaser.Scene {
 
         content.setPosition(
             bubble.x + bubbleWidth / 2 - b.width / 2,
-            bubble.y + bubbleHeight / 2 - b.height / 2
+            bubble.y + bubbleHeight / 2 - b.height / 2,
         );
 
         // hide them, they'll get made visible in cycleDialogue()
@@ -577,7 +623,7 @@ export default class StartScene extends Phaser.Scene {
             return;
         }
 
-        const terminalHistory = document.getElementById('terminal-history');
+        const terminalHistory = document.getElementById("terminal-history");
         if (!terminalHistory) {
             return;
         }
@@ -592,87 +638,121 @@ export default class StartScene extends Phaser.Scene {
         };
 
         // todo: need to move command code to different functions, they're fine here for now
-        const commandParts = text.split(' ');
+        const commandParts = text.split(" ");
         for (let commandPart of commandParts) {
             commandPart = commandPart.trim();
         }
         const command = commandParts[0];
         switch (command) {
-            case 'clear': {
-                addOutput('');
+            case "clear": {
+                addOutput("");
                 return;
             }
-            case 'ls': {
-                let output = '';
-                for (const [name, item] of Object.entries(fsListItemsInDirectory(this.currentDirectory))) {
+            case "ls": {
+                let output = "";
+                for (const [name, item] of Object.entries(
+                    fsListItemsInDirectory(this.currentDirectory),
+                )) {
                     let colorClass: string;
                     switch (item.type) {
-                        case 'file': colorClass = 'terminal-span-file-color'; break;
-                        case 'zip':  colorClass = 'terminal-span-zip-color';  break;
-                        case 'dir':  colorClass = 'terminal-span-dir-color';  break;
+                        case "file":
+                            colorClass = "terminal-span-file-color";
+                            break;
+                        case "zip":
+                            colorClass = "terminal-span-zip-color";
+                            break;
+                        case "dir":
+                            colorClass = "terminal-span-dir-color";
+                            break;
                     }
                     output += `<span class="${colorClass}">${name}</span>\n`;
                 }
                 addOutput(output);
                 return;
             }
-            case 'unzip': {
+            case "unzip": {
                 if (commandParts.length <= 1) {
-                    addOutput('Command "unzip" needs to know what zip file you want to unzip.');
+                    addOutput(
+                        'Command "unzip" needs to know what zip file you want to unzip.',
+                    );
                     return;
                 }
-                for (const [name, item] of Object.entries(fsListItemsInDirectory(this.currentDirectory))) {
-                    if (name === commandParts[1] && item.type === 'zip') {
+                for (const [name, item] of Object.entries(
+                    fsListItemsInDirectory(this.currentDirectory),
+                )) {
+                    if (name === commandParts[1] && item.type === "zip") {
                         fsExtractZip(item);
-                        addOutput(`Successfully unzipped file called "${name}"!`);
+                        addOutput(
+                            `Successfully unzipped file called "${name}"!`,
+                        );
                         return;
                     }
                 }
-                addOutput(`Command "unzip" could not find a zip file called "${commandParts[1]}".`);
+                addOutput(
+                    `Command "unzip" could not find a zip file called "${commandParts[1]}".`,
+                );
                 return;
             }
-            case 'cat': {
+            case "cat": {
                 if (commandParts.length <= 1) {
-                    addOutput('Command "cat" needs to know what file you want to read.');
+                    addOutput(
+                        'Command "cat" needs to know what file you want to read.',
+                    );
                     return;
                 }
-                for (const [name, item] of Object.entries(fsListItemsInDirectory(this.currentDirectory))) {
-                    if (name === commandParts[1] && item.type === 'file') {
+                for (const [name, item] of Object.entries(
+                    fsListItemsInDirectory(this.currentDirectory),
+                )) {
+                    if (name === commandParts[1] && item.type === "file") {
                         addOutput(item.contents);
                         return;
                     }
                 }
-                addOutput(`Command "cat" could not find a file called "${commandParts[1]}".`);
+                addOutput(
+                    `Command "cat" could not find a file called "${commandParts[1]}".`,
+                );
                 return;
             }
-            case 'cd': {
+            case "cd": {
                 // todo: this is dependent on the fs being how it is, delete this code and rewrite it asap
                 // this gives "remove before E3 2003" source engine comment vibes
-                if (this.currentDirectory === THE_ENTIRE_DAMN_CAT_FILESYSTEM && commandParts[1] == 'dir1') {
-                    const dir1 = THE_ENTIRE_DAMN_CAT_FILESYSTEM.contents['dir1'];
-                    if (dir1.type !== 'dir') {
+                if (
+                    this.currentDirectory === THE_ENTIRE_DAMN_CAT_FILESYSTEM &&
+                    commandParts[1] == "dir1"
+                ) {
+                    const dir1 =
+                        THE_ENTIRE_DAMN_CAT_FILESYSTEM.contents["dir1"];
+                    if (dir1.type !== "dir") {
                         // will never happen
                         return;
                     }
                     this.currentDirectory = dir1;
                     addOutput('Set current directory to "/dir1/".');
-                } else if (this.currentDirectory === THE_ENTIRE_DAMN_CAT_FILESYSTEM.contents['dir1'] && commandParts[1] == '..') {
+                } else if (
+                    this.currentDirectory ===
+                        THE_ENTIRE_DAMN_CAT_FILESYSTEM.contents["dir1"] &&
+                    commandParts[1] == ".."
+                ) {
                     this.currentDirectory = THE_ENTIRE_DAMN_CAT_FILESYSTEM;
                     addOutput('Set current directory to "/".');
                 } else {
-                    addOutput(`Could not change directory: directory "${commandParts[1]}" doesn't exist.`);
+                    addOutput(
+                        `Could not change directory: directory "${commandParts[1]}" doesn't exist.`,
+                    );
                 }
                 return;
             }
-            case 'echo': {
+            case "echo": {
                 addOutput(text.substring(4));
                 return;
             }
-            case 'cowsay': {
-                addOutput(cowsay.say({
-                    text: text.substring(6).trim(),
-                    //f: 'kitty',
-                }));
+            case "cowsay": {
+                addOutput(
+                    cowsay.say({
+                        text: text.substring(6).trim(),
+                        //f: 'kitty',
+                    }),
+                );
                 return;
             }
             default: {
@@ -682,9 +762,19 @@ export default class StartScene extends Phaser.Scene {
         }
     }
 
-    setObjective(objective:string){
+    setObjective(objective: string) {
         this.objectiveText.destroy();
-        this.objectiveText = this.add.text(805, 700, "Objective: " + objective, {backgroundColor:"#000", fontSize: "17px"});
+        // check if there should be no objective
+        if (objective.length > 0) {
+            this.objectiveText = this.add.text(
+                805,
+                700,
+                "Objective: " + objective,
+                { backgroundColor: "#000", fontSize: "17px" },
+            );
+        } else {
+            this.objectiveText = this.add.text(805, 700, objective);
+        }
     }
 
     update() {
