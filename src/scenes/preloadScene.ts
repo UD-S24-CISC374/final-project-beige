@@ -11,6 +11,7 @@ export default class PreloadScene extends Phaser.Scene {
         // desktop icon assets
         this.load.image("locked program", "assets/img/locked file.png");
         this.load.image("unlocked program", "assets/img/unlocked file.png");
+        this.load.image("x", "assets/img/x.png");
         this.load.image("locked text", "assets/img/locked text file.png");
         this.load.image("unlocked text", "assets/img/unlocked text file.png");
         this.load.image("article1", "assets/img/window.png");
