@@ -31,12 +31,13 @@ type CatEntry = CatDir | CatZip | CatFile;
 const THE_ENTIRE_DAMN_CAT_FILESYSTEM: CatDir = {
     type: "dir",
     contents: {
-        dir1: {
+        logs: {
             type: "dir",
             contents: {
-                "file2.txt": {
+                "log4-15-2024.txt": {
                     type: "file",
-                    contents: "FILE CONTENTS GO HERE (2)",
+                    contents:
+                        "Log not included in the alpha. Please pay us $5.99",
                 },
                 "dir2.zip": {
                     type: "zip",
@@ -50,9 +51,10 @@ const THE_ENTIRE_DAMN_CAT_FILESYSTEM: CatDir = {
                 },
             },
         },
-        "file1.txt": {
+        "instructions.txt": {
             type: "file",
-            contents: "FILE CONTENTS GO HERE (1)",
+            contents:
+                "While I start developing the hack, here are some commands to get you up to speed.\nI know you're not the most experienced but these shouldn't be too hard to understand.\n\necho <TEXT>: Have the terminal 'say' the TEXT\n\ncd <DIRECTORY>: Navigate to a new directory with new files!\n\ncat <FILE>: Read this FILE in the terminal!",
         },
     },
 };
@@ -89,6 +91,7 @@ export default class StartScene extends Phaser.Scene {
     // this will have a number corresponding to the speech bubble 'ID' and an object containing the speech bubble graphics to display
     bubbleData: object;
     lastCommandRun: string;
+    lastOutput: string;
     currentDirectory: CatDir;
     CAT: Phaser.GameObjects.Sprite;
     // this is the objective
@@ -474,6 +477,168 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
+                    "Okay, so now you can actually have that file show up in the terminal.",
+                );
+                // make the white bubble graphic visible
+                Object.values(showBubble)[0].visible = true;
+                // make the text object visible
+                Object.values(showBubble)[1].visible = true;
+                // add objective text under cat
+                this.setObjective("");
+                break;
+            case 13:
+                showBubble = this.createSpeechBubble(
+                    1060,
+                    400,
+                    200,
+                    100,
+                    "You’ve got instructions. Go ahead.",
+                );
+                // make the white bubble graphic visible
+                Object.values(showBubble)[0].visible = true;
+                // make the text object visible
+                Object.values(showBubble)[1].visible = true;
+                // add objective text under cat
+                this.setObjective("Make the file appear in the terminal.");
+                break;
+            case 14:
+                showBubble = this.createSpeechBubble(
+                    1060,
+                    400,
+                    200,
+                    100,
+                    "To see the file name, try the 'ls' command to see what files are there.",
+                );
+                // make the white bubble graphic visible
+                Object.values(showBubble)[0].visible = true;
+                // make the text object visible
+                Object.values(showBubble)[1].visible = true;
+                break;
+            case 15:
+                // check if the player did it right
+                if (this.lastCommandRun == "cat instructions.txt") {
+                    showBubble = this.createSpeechBubble(
+                        1060,
+                        400,
+                        200,
+                        100,
+                        "Okay good, you're learning.",
+                    );
+                    // make the white bubble graphic visible
+                    Object.values(showBubble)[0].visible = true;
+                    // make the text object visible
+                    Object.values(showBubble)[1].visible = true;
+                    // add objective text under cat
+                    this.setObjective("");
+                } else {
+                    showBubble = this.createSpeechBubble(
+                        1060,
+                        400,
+                        200,
+                        100,
+                        "Womp womp. Try again.",
+                    );
+                    // make the white bubble graphic visible
+                    Object.values(showBubble)[0].visible = true;
+                    // make the text object visible
+                    Object.values(showBubble)[1].visible = true;
+                    // they were wrong, so don't let them go to the next speech bubble
+                    bubbleNum = bubbleNum - 1;
+                }
+                break;
+            case 16:
+                showBubble = this.createSpeechBubble(
+                    1060,
+                    400,
+                    200,
+                    100,
+                    "WHOA! TEXT! That’s actually insane.",
+                );
+                // make the white bubble graphic visible
+                Object.values(showBubble)[0].visible = true;
+                // make the text object visible
+                Object.values(showBubble)[1].visible = true;
+                break;
+            case 17:
+                showBubble = this.createSpeechBubble(
+                    1060,
+                    400,
+                    200,
+                    100,
+                    "Hm… Maybe you can help me out with something…",
+                );
+                // make the white bubble graphic visible
+                Object.values(showBubble)[0].visible = true;
+                // make the text object visible
+                Object.values(showBubble)[1].visible = true;
+                break;
+            case 18:
+                showBubble = this.createSpeechBubble(
+                    1060,
+                    400,
+                    200,
+                    100,
+                    "There’s been a file on this computer that’s interested me for quite some time.",
+                );
+                // make the white bubble graphic visible
+                Object.values(showBubble)[0].visible = true;
+                // make the text object visible
+                Object.values(showBubble)[1].visible = true;
+                break;
+            case 19:
+                showBubble = this.createSpeechBubble(
+                    1060,
+                    400,
+                    200,
+                    100,
+                    "Use the instructions to find and read out the file named ‘log4-15-2024.txt’.",
+                );
+                // make the white bubble graphic visible
+                Object.values(showBubble)[0].visible = true;
+                // make the text object visible
+                Object.values(showBubble)[1].visible = true;
+                // add objective text under cat
+                this.setObjective("Find and read 'log4-15-2024'.");
+                break;
+            case 20:
+                // check if the player did it right
+                // must compare output for this one
+                if (this.lastCommandRun == "cat log4-15-2024.txt") {
+                    showBubble = this.createSpeechBubble(
+                        1060,
+                        400,
+                        200,
+                        100,
+                        "Perfect!",
+                    );
+                    // make the white bubble graphic visible
+                    Object.values(showBubble)[0].visible = true;
+                    // make the text object visible
+                    Object.values(showBubble)[1].visible = true;
+                    // add objective text under cat
+                    this.setObjective("");
+                } else {
+                    showBubble = this.createSpeechBubble(
+                        1060,
+                        400,
+                        200,
+                        100,
+                        "Are you in the right place?",
+                    );
+                    // make the white bubble graphic visible
+                    Object.values(showBubble)[0].visible = true;
+                    // make the text object visible
+                    Object.values(showBubble)[1].visible = true;
+                    // they were wrong, so don't let them go to the next speech bubble
+                    bubbleNum = bubbleNum - 1;
+                }
+                break;
+            case 21:
+                showBubble = this.createSpeechBubble(
+                    1060,
+                    400,
+                    200,
+                    100,
                     "Now for the sake of the alpha, I'm going to unlock a file for you.",
                 );
                 // make the white bubble graphic visible
@@ -487,7 +652,7 @@ export default class StartScene extends Phaser.Scene {
                     .setInteractive();
                 this.setObjective("Check out the program CAT unlocked!");
                 break;
-            case 13:
+            case 22:
                 showBubble = this.createSpeechBubble(
                     1060,
                     400,
@@ -501,13 +666,13 @@ export default class StartScene extends Phaser.Scene {
                 Object.values(showBubble)[1].visible = true;
                 this.setObjective("Close the window.");
                 break;
-            case 14:
+            case 23:
                 showBubble = this.createSpeechBubble(
                     1060,
                     400,
                     200,
                     100,
-                    "You can use ls, cat, and unzip too! Try it out!",
+                    "You can use move windows, use cowsay, and unzip too! Try it out!",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
@@ -515,7 +680,7 @@ export default class StartScene extends Phaser.Scene {
                 Object.values(showBubble)[1].visible = true;
                 this.setObjective("Explore the terminal for the alpha!");
                 break;
-            case 15:
+            case 24:
                 showBubble = this.createSpeechBubble(
                     1060,
                     400,
@@ -628,6 +793,8 @@ export default class StartScene extends Phaser.Scene {
         // todo: need to improve output
         const addOutput = (output: string) => {
             terminalHistory.innerHTML = output.trim();
+            // CAT checks this for some commands
+            this.lastOutput = output.trim();
         };
 
         // todo: need to move command code to different functions, they're fine here for now
@@ -711,19 +878,19 @@ export default class StartScene extends Phaser.Scene {
                 // this gives "remove before E3 2003" source engine comment vibes
                 if (
                     this.currentDirectory === THE_ENTIRE_DAMN_CAT_FILESYSTEM &&
-                    commandParts[1] == "dir1"
+                    commandParts[1] == "logs"
                 ) {
-                    const dir1 =
-                        THE_ENTIRE_DAMN_CAT_FILESYSTEM.contents["dir1"];
-                    if (dir1.type !== "dir") {
+                    const logs =
+                        THE_ENTIRE_DAMN_CAT_FILESYSTEM.contents["logs"];
+                    if (logs.type !== "dir") {
                         // will never happen
                         return;
                     }
-                    this.currentDirectory = dir1;
-                    addOutput('Set current directory to "/dir1/".');
+                    this.currentDirectory = logs;
+                    addOutput('Set current directory to "/logs/".');
                 } else if (
                     this.currentDirectory ===
-                        THE_ENTIRE_DAMN_CAT_FILESYSTEM.contents["dir1"] &&
+                        THE_ENTIRE_DAMN_CAT_FILESYSTEM.contents["logs"] &&
                     commandParts[1] == ".."
                 ) {
                     this.currentDirectory = THE_ENTIRE_DAMN_CAT_FILESYSTEM;
@@ -757,12 +924,17 @@ export default class StartScene extends Phaser.Scene {
 
     setObjective(objective: string) {
         this.objectiveText.destroy();
-        this.objectiveText = this.add.text(
-            805,
-            700,
-            "Objective: " + objective,
-            { backgroundColor: "#000", fontSize: "17px" },
-        );
+        // check if there should be no objective
+        if (objective.length > 0) {
+            this.objectiveText = this.add.text(
+                800,
+                700,
+                "Objective: " + objective,
+                { backgroundColor: "#000", fontSize: "17px" },
+            );
+        } else {
+            this.objectiveText = this.add.text(805, 700, objective);
+        }
     }
 
     update() {
