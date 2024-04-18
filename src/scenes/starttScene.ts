@@ -98,7 +98,7 @@ const fsExtractZip = (zip: CatZip) => {
     zip.extracted = true;
 };
 
-const fsReadFile = (file: CatEntry, cleanHTML: boolean = true) => {
+const fsReadFile = (file: CatEntry, cleanHTML: boolean = false) => {
     if (file.type !== 'file') {
         return `Error: attempted to read a file, but was actually reading a ${file.type}!`;
     }
@@ -230,7 +230,7 @@ export default class StartScene extends Phaser.Scene {
         });
         txt1.on("pointerup", () => {
             txt1.clearTint();
-            makeTxtFile(fsReadFile(THE_ENTIRE_DAMN_CAT_FILESYSTEM.children["instructions.txt"], false));
+            makeTxtFile(fsReadFile(THE_ENTIRE_DAMN_CAT_FILESYSTEM.children["instructions.txt"]));
         });
         // SPEECH
         // switch cases are used to determine which speech bubble to display/destory
@@ -883,7 +883,7 @@ export default class StartScene extends Phaser.Scene {
                     fsListItemsInDirectory(this.currentDirectory),
                 )) {
                     if (name === commandParts[1] && item.type === "file") {
-                        addOutput(fsReadFile(item));
+                        addOutput(fsReadFile(item, true));
                         return;
                     }
                 }
