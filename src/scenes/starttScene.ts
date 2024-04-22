@@ -8,20 +8,24 @@ import ProgramFile from "../objects/programFile";
 type CatFile = {
     type: "file";
     contents: string;
+    children: {
+        // This should always be empty, it's just here for type-safe indexing
+        [childName: string]: CatFile;
+    };
 };
 
 type CatZip = {
     type: "zip";
     extracted: boolean;
-    contents: {
+    children: {
         [childName: string]: CatFile;
     };
 };
 
 type CatDir = {
-    parent?: string | undefined;
     type: "dir";
-    contents: {
+    parent?: string | undefined;
+    children: {
         [childName: string]: CatFile | CatZip | CatDir;
     };
 };
@@ -30,22 +34,23 @@ type CatEntry = CatDir | CatZip | CatFile;
 
 const THE_ENTIRE_DAMN_CAT_FILESYSTEM: CatDir = {
     type: "dir",
-    contents: {
-        logs: {
+    children: {
+        "logs": {
             type: "dir",
-            contents: {
+            children: {
                 "log4-15-2024.txt": {
                     type: "file",
-                    contents:
-                        "Log not included in the alpha. Please pay us $5.99",
+                    contents: "Log not included in the alpha. Please pay us $5.99",
+                    children: {},
                 },
                 "dir2.zip": {
                     type: "zip",
                     extracted: false,
-                    contents: {
+                    children: {
                         "file3.txt": {
                             type: "file",
                             contents: "FILE CONTENTS GO HERE (3)",
+                            children: {},
                         },
                     },
                 },
@@ -53,15 +58,22 @@ const THE_ENTIRE_DAMN_CAT_FILESYSTEM: CatDir = {
         },
         "instructions.txt": {
             type: "file",
-            contents:
-                "While I start developing the hack, here are some commands to get you up to speed.\nI know you're not the most experienced but these shouldn't be too hard to understand.\n\necho <TEXT>: Have the terminal 'say' the TEXT\n\ncd <DIRECTORY>: Navigate to a new directory with new files!\n\ncat <FILE>: Read this FILE in the terminal!",
+            contents: `While I start developing the hack, here are some commands to get you up to speed.
+I know you're not the most experienced but these shouldn't be too hard to understand.
+
+echo <TEXT>: Have the terminal 'say' the TEXT
+
+cd <DIRECTORY>: Navigate to a new directory with new files!
+
+cat <FILE>: Read this FILE in the terminal!`,
+            children: {},
         },
     },
 };
 
 const fsListItemsInZip = (zip: CatZip): { [name: string]: CatFile } => {
     const out: { [name: string]: CatFile } = {};
-    for (const [fileName, item] of Object.entries(zip.contents)) {
+    for (const [fileName, item] of Object.entries(zip.children)) {
         out[fileName] = item;
     }
     return out;
@@ -69,7 +81,7 @@ const fsListItemsInZip = (zip: CatZip): { [name: string]: CatFile } => {
 
 const fsListItemsInDirectory = (dir: CatDir): { [name: string]: CatEntry } => {
     const out: { [name: string]: CatEntry } = {};
-    for (const [itemName, item] of Object.entries(dir.contents)) {
+    for (const [itemName, item] of Object.entries(dir.children)) {
         if (item.type === "zip" && item.extracted) {
             const zipContents = fsListItemsInZip(item);
             for (const [fileName, file] of Object.entries(zipContents)) {
@@ -85,6 +97,19 @@ const fsListItemsInDirectory = (dir: CatDir): { [name: string]: CatEntry } => {
 const fsExtractZip = (zip: CatZip) => {
     zip.extracted = true;
 };
+
+const fsReadFile = (file: CatEntry, cleanHTML: boolean = false) => {
+    if (file.type !== 'file') {
+        return `Error: attempted to read a file, but was actually reading a ${file.type}!`;
+    }
+    if (!cleanHTML) {
+        return file.contents;
+    }
+    return file.contents
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
+}
 // FILESYSTEM CODE END -----
 
 export default class StartScene extends Phaser.Scene {
@@ -205,10 +230,7 @@ export default class StartScene extends Phaser.Scene {
         });
         txt1.on("pointerup", () => {
             txt1.clearTint();
-            //Below once text is actually defined somewhere we can pull from there for each text file
-            makeTxtFile(
-                "While I start developing the hack, here are some commands to get you up to speed.\nI know you're not the most experienced but these shouldn't be too hard to understand.\n\necho <TEXT>: Have the terminal 'say' the TEXT\n\ncd <DIRECTORY>: Navigate to a new directory with new files!\n\ncat <FILE>: Read this FILE in the terminal!",
-            );
+            makeTxtFile(fsReadFile(THE_ENTIRE_DAMN_CAT_FILESYSTEM.children["instructions.txt"]));
         });
         // SPEECH
         // switch cases are used to determine which speech bubble to display/destory
@@ -797,7 +819,6 @@ export default class StartScene extends Phaser.Scene {
             this.lastOutput = output.trim();
         };
 
-        // todo: need to move command code to different functions, they're fine here for now
         const commandParts = text.split(" ");
         for (let commandPart of commandParts) {
             commandPart = commandPart.trim();
@@ -855,50 +876,36 @@ export default class StartScene extends Phaser.Scene {
             }
             case "cat": {
                 if (commandParts.length <= 1) {
-                    addOutput(
-                        'Command "cat" needs to know what file you want to read.',
-                    );
+                    addOutput('Command "cat" needs to know what file you want to read.');
                     return;
                 }
                 for (const [name, item] of Object.entries(
                     fsListItemsInDirectory(this.currentDirectory),
                 )) {
                     if (name === commandParts[1] && item.type === "file") {
-                        addOutput(item.contents);
+                        addOutput(fsReadFile(item, true));
                         return;
                     }
                 }
-                addOutput(
-                    `Command "cat" could not find a file called "${commandParts[1]}".`,
-                );
+                addOutput(`Command "cat" could not find a file called "${commandParts[1]}".`);
                 return;
             }
             case "cd": {
                 // todo: this is dependent on the fs being how it is, delete this code and rewrite it asap
                 // this gives "remove before E3 2003" source engine comment vibes
-                if (
-                    this.currentDirectory === THE_ENTIRE_DAMN_CAT_FILESYSTEM &&
-                    commandParts[1] == "logs"
-                ) {
-                    const logs =
-                        THE_ENTIRE_DAMN_CAT_FILESYSTEM.contents["logs"];
+                if (this.currentDirectory === THE_ENTIRE_DAMN_CAT_FILESYSTEM && commandParts[1] == "logs") {
+                    const logs = THE_ENTIRE_DAMN_CAT_FILESYSTEM.children["logs"];
                     if (logs.type !== "dir") {
                         // will never happen
                         return;
                     }
                     this.currentDirectory = logs;
                     addOutput('Set current directory to "/logs/".');
-                } else if (
-                    this.currentDirectory ===
-                        THE_ENTIRE_DAMN_CAT_FILESYSTEM.contents["logs"] &&
-                    commandParts[1] == ".."
-                ) {
+                } else if (this.currentDirectory === THE_ENTIRE_DAMN_CAT_FILESYSTEM.children["logs"] && commandParts[1] == "..") {
                     this.currentDirectory = THE_ENTIRE_DAMN_CAT_FILESYSTEM;
                     addOutput('Set current directory to "/".');
                 } else {
-                    addOutput(
-                        `Could not change directory: directory "${commandParts[1]}" doesn't exist.`,
-                    );
+                    addOutput(`Could not change directory: directory "${commandParts[1]}" doesn't exist.`);
                 }
                 return;
             }
