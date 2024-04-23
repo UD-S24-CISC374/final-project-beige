@@ -35,21 +35,65 @@ type CatEntry = CatDir | CatZip | CatFile;
 const THE_ENTIRE_DAMN_CAT_FILESYSTEM: CatDir = {
     type: "dir",
     children: {
-        "logs": {
+        logs: {
             type: "dir",
             children: {
                 "log4-15-2024.txt": {
                     type: "file",
-                    contents: "Log not included in the alpha. Please pay us $5.99",
+                    contents: `wizard56: Can we really do this? That's awesome!
+lizard58: Of course we can, we'll just need a name.
+lizard58: There's no way we can get caught.
+wizard56: But we need justice for our friend.
+lizard58: Exactly. I've got just the name for us.
+wizard56: Wait hold on who let you pick the name?
+lizard58: Me, I'm literally the guy who has coding experience here dummy!!
+wizard56: Man I wanna pick the name, Im great at naming things.
+lizard58: No way am I letting you name our alias.
+lizard58: You'll name us a number or something stupid.`,
+                    children: {},
+                },
+                "baller.txt": {
+                    type: "file",
+                    contents: `It's time to learn some BALLER techniques.
+
+You ever feel trapped in a directory? With no way to get out?
+Well boy do I have a command for you!
+INTRODUCING "cd .." This will change your directory to the one you were in previously! Incredible!
+
+You ever encounter a directory that ends in .zip? With no way to open it?
+Well girl do I have a command for you!
+INTRODUCING "unzip DIRECTORY.zip" This will unzip that directory so you can get to explorin it!`,
                     children: {},
                 },
                 "dir2.zip": {
                     type: "zip",
                     extracted: false,
                     children: {
-                        "file3.txt": {
+                        "rm.txt": {
                             type: "file",
-                            contents: "FILE CONTENTS GO HERE (3)",
+                            contents: `wizard56: Duuuuuuuuuuuuuuuude I accidentally made a virus.
+lizard58: HOW DO YOU JUST *MAKE* A VIRUS???
+wizard56: Idk dude but I need to remove it STAT.
+lizard58: Ohhhhhhhhh boy ok. Use the rm command.
+wizard56: rm? That stand for remove?
+lizard58: YES YOU TYPE IN rm AND THEN WHAT YOU WANT TO REMOVE
+wizard56: So like "rm virus"?
+lizard58: IF YOU ACTUALLY NAMED YOUR VIRUS virus THEN YES. YES.
+wizard56: Thank you :)
+lizard58: I'm going to rm you in a second.`,
+                            children: {},
+                        },
+                        "log4-20-2024.txt": {
+                            type: "file",
+                            contents: `lizard58: Alright it's done!
+wizard56: YES! THEY'LL NEVER KNOW WHO HIT EM!
+lizard58: The articles will be CRAZY after this one.
+lizard58: We should lock them up in case our logs get out.
+wizard56: Ooh ooh! Ok I'll make a program that can lock it!
+lizard58: Ok I'll leave it to you, we just have to hope no one gets rid of it.
+wizard56: Nah that would never happen, we're too cool.
+lizard58: Soon we'll have justice :)
+wizard56: <:D`,
                             children: {},
                         },
                     },
@@ -58,14 +102,16 @@ const THE_ENTIRE_DAMN_CAT_FILESYSTEM: CatDir = {
         },
         "instructions.txt": {
             type: "file",
-            contents: `While I start developing the hack, here are some commands to get you up to speed.
-I know you're not the most experienced but these shouldn't be too hard to understand.
+            contents: `Let's learn some commands!
 
-echo <TEXT>: Have the terminal 'say' the TEXT
+echo TEXT: Have the terminal 'say' the TEXT that you enter.
+        Ex: "echo haha" would make the terminal say "haha"
 
-cd <DIRECTORY>: Navigate to a new directory with new files!
+cd DIRECTORY: Navigate to a new DIRECTORY with new files!
 
-cat <FILE>: Read this FILE in the terminal!`,
+cat FILE: Read a FILE that you choose in the terminal!
+
+ls: Lists everything in your current directory!`,
             children: {},
         },
     },
@@ -99,17 +145,17 @@ const fsExtractZip = (zip: CatZip) => {
 };
 
 const fsReadFile = (file: CatEntry, cleanHTML: boolean = false) => {
-    if (file.type !== 'file') {
+    if (file.type !== "file") {
         return `Error: attempted to read a file, but was actually reading a ${file.type}!`;
     }
     if (!cleanHTML) {
         return file.contents;
     }
     return file.contents
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;');
-}
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+};
 // FILESYSTEM CODE END -----
 
 export default class StartScene extends Phaser.Scene {
@@ -230,7 +276,11 @@ export default class StartScene extends Phaser.Scene {
         });
         txt1.on("pointerup", () => {
             txt1.clearTint();
-            makeTxtFile(fsReadFile(THE_ENTIRE_DAMN_CAT_FILESYSTEM.children["instructions.txt"]));
+            makeTxtFile(
+                fsReadFile(
+                    THE_ENTIRE_DAMN_CAT_FILESYSTEM.children["instructions.txt"],
+                ),
+            );
         });
         // SPEECH
         // switch cases are used to determine which speech bubble to display/destory
@@ -876,7 +926,9 @@ export default class StartScene extends Phaser.Scene {
             }
             case "cat": {
                 if (commandParts.length <= 1) {
-                    addOutput('Command "cat" needs to know what file you want to read.');
+                    addOutput(
+                        'Command "cat" needs to know what file you want to read.',
+                    );
                     return;
                 }
                 for (const [name, item] of Object.entries(
@@ -887,25 +939,37 @@ export default class StartScene extends Phaser.Scene {
                         return;
                     }
                 }
-                addOutput(`Command "cat" could not find a file called "${commandParts[1]}".`);
+                addOutput(
+                    `Command "cat" could not find a file called "${commandParts[1]}".`,
+                );
                 return;
             }
             case "cd": {
                 // todo: this is dependent on the fs being how it is, delete this code and rewrite it asap
                 // this gives "remove before E3 2003" source engine comment vibes
-                if (this.currentDirectory === THE_ENTIRE_DAMN_CAT_FILESYSTEM && commandParts[1] == "logs") {
-                    const logs = THE_ENTIRE_DAMN_CAT_FILESYSTEM.children["logs"];
+                if (
+                    this.currentDirectory === THE_ENTIRE_DAMN_CAT_FILESYSTEM &&
+                    commandParts[1] == "logs"
+                ) {
+                    const logs =
+                        THE_ENTIRE_DAMN_CAT_FILESYSTEM.children["logs"];
                     if (logs.type !== "dir") {
                         // will never happen
                         return;
                     }
                     this.currentDirectory = logs;
                     addOutput('Set current directory to "/logs/".');
-                } else if (this.currentDirectory === THE_ENTIRE_DAMN_CAT_FILESYSTEM.children["logs"] && commandParts[1] == "..") {
+                } else if (
+                    this.currentDirectory ===
+                        THE_ENTIRE_DAMN_CAT_FILESYSTEM.children["logs"] &&
+                    commandParts[1] == ".."
+                ) {
                     this.currentDirectory = THE_ENTIRE_DAMN_CAT_FILESYSTEM;
                     addOutput('Set current directory to "/".');
                 } else {
-                    addOutput(`Could not change directory: directory "${commandParts[1]}" doesn't exist.`);
+                    addOutput(
+                        `Could not change directory: directory "${commandParts[1]}" doesn't exist.`,
+                    );
                 }
                 return;
             }
