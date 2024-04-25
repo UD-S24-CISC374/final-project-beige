@@ -185,6 +185,10 @@ export default class StartScene extends Phaser.Scene {
         this.CAT = this.add.sprite(1100, 600, "CAT");
         // Add File Sound Effects
         let lockedsfx = this.sound.add("lockedfile");
+        // GLOBL SOUNDS
+        let pop = this.sound.add("pop");
+        let blip = this.sound.add("blip");
+
         // Make CAT clickable
         this.CAT.setInteractive();
         this.objectiveText = this.add.text(0, 0, "");
@@ -229,6 +233,7 @@ export default class StartScene extends Phaser.Scene {
                         Object.values(this.bubbleData)[0],
                         Object.values(this.bubbleData)[1],
                     );
+                    pop.play();
                     // CHECK FOR UNLOCKED FILES HERE
                 } else if (
                     objectsClicked.length > 0 &&
@@ -316,6 +321,7 @@ export default class StartScene extends Phaser.Scene {
         terminalInput.style.fontSize = terminalFontSize;
         this.game.canvas.parentNode?.appendChild(terminalInput);
         terminalInput.addEventListener("change", () => {
+            blip.play();
             this.parseCommand(terminalInput.value);
             terminalInput.value = "";
         });
@@ -674,7 +680,7 @@ export default class StartScene extends Phaser.Scene {
                 break;
             case 20:
                 // check if the player did it right
-                // must compare output for this one
+                // TODO: must compare output for this one
                 if (this.lastCommandRun == "cat log4-15-2024.txt") {
                     showBubble = this.createSpeechBubble(
                         1060,
@@ -711,32 +717,47 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "Now for the sake of the alpha, I'm going to unlock a file for you.",
+                    "I think there's more for you to explore You should look around.",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
                 // make the text object visible
                 Object.values(showBubble)[1].visible = true;
-                // Unlock file here
-                this.murderArticle.destroy();
-                this.murderArticle = this.add
-                    .image(100, 100, "unlocked program")
-                    .setInteractive();
-                this.setObjective("Check out the program CAT unlocked!");
+                // add objective text under cat
+                this.setObjective("Find and read 'baller.txt'.");
                 break;
             case 22:
-                showBubble = this.createSpeechBubble(
-                    1060,
-                    400,
-                    200,
-                    100,
-                    "You can click the x on windows to close them!",
-                );
-                // make the white bubble graphic visible
-                Object.values(showBubble)[0].visible = true;
-                // make the text object visible
-                Object.values(showBubble)[1].visible = true;
-                this.setObjective("Close the window.");
+                // check if the player did it right
+                // TODO: must compare output for this one
+                if (this.lastCommandRun == "cat baller.txt") {
+                    showBubble = this.createSpeechBubble(
+                        1060,
+                        400,
+                        200,
+                        100,
+                        "Well, there you go.",
+                    );
+                    // make the white bubble graphic visible
+                    Object.values(showBubble)[0].visible = true;
+                    // make the text object visible
+                    Object.values(showBubble)[1].visible = true;
+                    // add objective text under cat
+                    this.setObjective("");
+                } else {
+                    showBubble = this.createSpeechBubble(
+                        1060,
+                        400,
+                        200,
+                        100,
+                        "Try 'ls'! You got that.",
+                    );
+                    // make the white bubble graphic visible
+                    Object.values(showBubble)[0].visible = true;
+                    // make the text object visible
+                    Object.values(showBubble)[1].visible = true;
+                    // they were wrong, so don't let them go to the next speech bubble
+                    bubbleNum = bubbleNum - 1;
+                }
                 break;
             case 23:
                 showBubble = this.createSpeechBubble(
@@ -744,13 +765,14 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "You can use move windows, use cowsay, and unzip too! Try it out!",
+                    "You're not a baby anymore.",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
                 // make the text object visible
                 Object.values(showBubble)[1].visible = true;
-                this.setObjective("Explore the terminal for the alpha!");
+                // add objective text under cat
+                this.setObjective("");
                 break;
             case 24:
                 showBubble = this.createSpeechBubble(
@@ -758,13 +780,27 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "Thank you for playing our alpha!",
+                    "You've got this next objective on your own.",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
                 // make the text object visible
                 Object.values(showBubble)[1].visible = true;
-                this.setObjective(":3");
+                // add objective text under cat
+                this.setObjective("Use what you learned in baller.txt");
+                break;
+            case 25:
+                showBubble = this.createSpeechBubble(
+                    1060,
+                    400,
+                    200,
+                    100,
+                    "I'll chime in when I think I should.",
+                );
+                // make the white bubble graphic visible
+                Object.values(showBubble)[0].visible = true;
+                // make the text object visible
+                Object.values(showBubble)[1].visible = true;
                 break;
         }
         bubbleNum = bubbleNum + 1;
