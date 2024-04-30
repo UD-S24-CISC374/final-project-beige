@@ -1,169 +1,15 @@
 import * as cowsay from "cowsay";
 import Phaser from "phaser";
+import { CATFS } from "../fs/CatFS";
 import TextFile from "../objects/textFile";
 import ProgramFile from "../objects/programFile";
 // CODE FOR createSpeechBubbles() HEAVILY REFERENCED FROM HERE: https://github.com/phaserjs/examples/blob/master/public/src/game%20objects/text/speech%20bubble.js
-
-// FILESYSTEM CODE BEGIN -----
-type CatFile = {
-    type: "file";
-    contents: string;
-    children: {
-        // This should always be empty, it's just here for type-safe indexing
-        [childName: string]: CatFile;
-    };
-};
-
-type CatZip = {
-    type: "zip";
-    extracted: boolean;
-    children: {
-        [childName: string]: CatFile;
-    };
-};
-
-type CatDir = {
-    type: "dir";
-    parent?: string | undefined;
-    children: {
-        [childName: string]: CatFile | CatZip | CatDir;
-    };
-};
-
-type CatEntry = CatDir | CatZip | CatFile;
-
-const THE_ENTIRE_DAMN_CAT_FILESYSTEM: CatDir = {
-    type: "dir",
-    children: {
-        logs: {
-            type: "dir",
-            children: {
-                "log4-15-2024.txt": {
-                    type: "file",
-                    contents: `wizard56: Can we really do this? That's awesome!
-lizard58: Of course we can, we'll just need a name.
-lizard58: There's no way we can get caught.
-wizard56: But we need justice for our friend.
-lizard58: Exactly. I've got just the name for us.
-wizard56: Wait hold on who let you pick the name?
-lizard58: Me, I'm literally the guy who has coding experience here dummy!!
-wizard56: Man I wanna pick the name, Im great at naming things.
-lizard58: No way am I letting you name our alias.
-lizard58: You'll name us a number or something stupid.`,
-                    children: {},
-                },
-                "baller.txt": {
-                    type: "file",
-                    contents: `It's time to learn some BALLER techniques.
-
-You ever feel trapped in a directory? With no way to get out?
-Well boy do I have a command for you!
-INTRODUCING "cd .." This will change your directory to the one you were in previously! Incredible!
-
-You ever encounter a directory that ends in .zip? With no way to open it?
-Well girl do I have a command for you!
-INTRODUCING "unzip DIRECTORY.zip" This will unzip that directory so you can get to explorin it!`,
-                    children: {},
-                },
-                "dir2.zip": {
-                    type: "zip",
-                    extracted: false,
-                    children: {
-                        "rm.txt": {
-                            type: "file",
-                            contents: `wizard56: Duuuuuuuuuuuuuuuude I accidentally made a virus.
-lizard58: HOW DO YOU JUST *MAKE* A VIRUS???
-wizard56: Idk dude but I need to remove it STAT.
-lizard58: Ohhhhhhhhh boy ok. Use the rm command.
-wizard56: rm? That stand for remove?
-lizard58: YES YOU TYPE IN rm AND THEN WHAT YOU WANT TO REMOVE
-wizard56: So like "rm virus"?
-lizard58: IF YOU ACTUALLY NAMED YOUR VIRUS virus THEN YES. YES.
-wizard56: Thank you :)
-lizard58: I'm going to rm you in a second.`,
-                            children: {},
-                        },
-                        "log4-20-2024.txt": {
-                            type: "file",
-                            contents: `lizard58: Alright it's done!
-wizard56: YES! THEY'LL NEVER KNOW WHO HIT EM!
-lizard58: The articles will be CRAZY after this one.
-lizard58: We should lock them up in case our logs get out.
-wizard56: Ooh ooh! Ok I'll make a program that can lock it!
-lizard58: Ok I'll leave it to you, we just have to hope no one gets rid of it.
-wizard56: Nah that would never happen, we're too cool.
-lizard58: Soon we'll have justice :)
-wizard56: <:D`,
-                            children: {},
-                        },
-                    },
-                },
-            },
-        },
-        "instructions.txt": {
-            type: "file",
-            contents: `Let's learn some commands!
-
-echo TEXT: Have the terminal 'say' the TEXT that you enter.
-        Ex: "echo haha" would make the terminal say "haha"
-
-cd DIRECTORY: Navigate to a new DIRECTORY with new files!
-
-cat FILE: Read a FILE that you choose in the terminal!
-
-ls: Lists everything in your current directory!`,
-            children: {},
-        },
-    },
-};
-
-const fsListItemsInZip = (zip: CatZip): { [name: string]: CatFile } => {
-    const out: { [name: string]: CatFile } = {};
-    for (const [fileName, item] of Object.entries(zip.children)) {
-        out[fileName] = item;
-    }
-    return out;
-};
-
-const fsListItemsInDirectory = (dir: CatDir): { [name: string]: CatEntry } => {
-    const out: { [name: string]: CatEntry } = {};
-    for (const [itemName, item] of Object.entries(dir.children)) {
-        if (item.type === "zip" && item.extracted) {
-            const zipContents = fsListItemsInZip(item);
-            for (const [fileName, file] of Object.entries(zipContents)) {
-                out[fileName] = file;
-            }
-        } else {
-            out[itemName] = item;
-        }
-    }
-    return out;
-};
-
-const fsExtractZip = (zip: CatZip) => {
-    zip.extracted = true;
-};
-
-const fsReadFile = (file: CatEntry, cleanHTML: boolean = false) => {
-    if (file.type !== "file") {
-        return `Error: attempted to read a file, but was actually reading a ${file.type}!`;
-    }
-    if (!cleanHTML) {
-        return file.contents;
-    }
-    return file.contents
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;");
-};
-// FILESYSTEM CODE END -----
 
 export default class StartScene extends Phaser.Scene {
     // this will have a number corresponding to the speech bubble 'ID' and an object containing the speech bubble graphics to display
     bubbleData: object;
     lastCommandRun: string;
     lastOutput: string;
-    currentDirectory: CatDir;
     CAT: Phaser.GameObjects.Sprite;
     // this is the objective
     objectiveText: Phaser.GameObjects.Text;
@@ -282,8 +128,8 @@ export default class StartScene extends Phaser.Scene {
         txt1.on("pointerup", () => {
             txt1.clearTint();
             makeTxtFile(
-                fsReadFile(
-                    THE_ENTIRE_DAMN_CAT_FILESYSTEM.children["instructions.txt"],
+                CATFS.readFile(
+                    "/instructions.txt",
                 ),
             );
         });
@@ -357,8 +203,6 @@ export default class StartScene extends Phaser.Scene {
             720 - terminalInputHeight / 2,
             terminalInput,
         );
-        // -- Finalize
-        this.currentDirectory = THE_ENTIRE_DAMN_CAT_FILESYSTEM;
     }
 
     // for opening file animation
@@ -904,6 +748,7 @@ export default class StartScene extends Phaser.Scene {
             // CAT checks this for some commands
             this.lastOutput = output.trim();
         };
+        addOutput("");
 
         const commandParts = text.split(" ");
         for (let commandPart of commandParts) {
@@ -917,47 +762,25 @@ export default class StartScene extends Phaser.Scene {
             }
             case "ls": {
                 let output = "";
-                for (const [name, item] of Object.entries(
-                    fsListItemsInDirectory(this.currentDirectory),
-                )) {
-                    let colorClass: string;
-                    switch (item.type) {
-                        case "file":
-                            colorClass = "terminal-span-file-color";
-                            break;
-                        case "zip":
-                            colorClass = "terminal-span-zip-color";
-                            break;
-                        case "dir":
-                            colorClass = "terminal-span-dir-color";
-                            break;
-                    }
+                const dirContents = CATFS.readCWD();
+                console.log(dirContents);
+                for (const name of dirContents.dirs) {
+                    const colorClass = "terminal-span-dir-color";
+                    output += `<span class="${colorClass}">${name}</span>\n`;
+                }
+                for (const name of dirContents.zips) {
+                    const colorClass = "terminal-span-zip-color";
+                    output += `<span class="${colorClass}">${name}</span>\n`;
+                }
+                for (const name of dirContents.files) {
+                    const colorClass = "terminal-span-file-color";
                     output += `<span class="${colorClass}">${name}</span>\n`;
                 }
                 addOutput(output);
                 return;
             }
             case "unzip": {
-                if (commandParts.length <= 1) {
-                    addOutput(
-                        'Command "unzip" needs to know what zip file you want to unzip.',
-                    );
-                    return;
-                }
-                for (const [name, item] of Object.entries(
-                    fsListItemsInDirectory(this.currentDirectory),
-                )) {
-                    if (name === commandParts[1] && item.type === "zip") {
-                        fsExtractZip(item);
-                        addOutput(
-                            `Successfully unzipped file called "${name}"!`,
-                        );
-                        return;
-                    }
-                }
-                addOutput(
-                    `Command "unzip" could not find a zip file called "${commandParts[1]}".`,
-                );
+                // todo: unzip
                 return;
             }
             case "cat": {
@@ -967,46 +790,19 @@ export default class StartScene extends Phaser.Scene {
                     );
                     return;
                 }
-                for (const [name, item] of Object.entries(
-                    fsListItemsInDirectory(this.currentDirectory),
-                )) {
-                    if (name === commandParts[1] && item.type === "file") {
-                        addOutput(fsReadFile(item, true));
-                        return;
-                    }
+                if (!CATFS.exists(commandParts[1])) {
+                    addOutput(
+                        `Command "cat" could not find a file called "${commandParts[1]}".`,
+                    );
+                    return;
                 }
                 addOutput(
-                    `Command "cat" could not find a file called "${commandParts[1]}".`,
+                    CATFS.readFile(commandParts[1], true),
                 );
                 return;
             }
             case "cd": {
-                // todo: this is dependent on the fs being how it is, delete this code and rewrite it asap
-                // this gives "remove before E3 2003" source engine comment vibes
-                if (
-                    this.currentDirectory === THE_ENTIRE_DAMN_CAT_FILESYSTEM &&
-                    commandParts[1] == "logs"
-                ) {
-                    const logs =
-                        THE_ENTIRE_DAMN_CAT_FILESYSTEM.children["logs"];
-                    if (logs.type !== "dir") {
-                        // will never happen
-                        return;
-                    }
-                    this.currentDirectory = logs;
-                    addOutput('Set current directory to "/logs/".');
-                } else if (
-                    this.currentDirectory ===
-                        THE_ENTIRE_DAMN_CAT_FILESYSTEM.children["logs"] &&
-                    commandParts[1] == ".."
-                ) {
-                    this.currentDirectory = THE_ENTIRE_DAMN_CAT_FILESYSTEM;
-                    addOutput('Set current directory to "/".');
-                } else {
-                    addOutput(
-                        `Could not change directory: directory "${commandParts[1]}" doesn't exist.`,
-                    );
-                }
+                CATFS.cwd = commandParts[1];
                 return;
             }
             case "echo": {
@@ -1017,7 +813,6 @@ export default class StartScene extends Phaser.Scene {
                 addOutput(
                     cowsay.say({
                         text: text.substring(6).trim(),
-                        //f: 'kitty',
                     }),
                 );
                 return;
