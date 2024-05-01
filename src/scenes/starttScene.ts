@@ -5,11 +5,14 @@ import TextFile from "../objects/textFile";
 import ProgramFile from "../objects/programFile";
 // CODE FOR createSpeechBubbles() HEAVILY REFERENCED FROM HERE: https://github.com/phaserjs/examples/blob/master/public/src/game%20objects/text/speech%20bubble.js
 
+const MAX_TERMINAL_HISTORY = 512;
+
 export default class StartScene extends Phaser.Scene {
     // this will have a number corresponding to the speech bubble 'ID' and an object containing the speech bubble graphics to display
     bubbleData: object;
-    lastCommandRun: string;
     lastOutput: string;
+    terminalHistory: string[] = [];
+    terminalHistoryIndex: number = 0;
     CAT: Phaser.GameObjects.Sprite;
     // this is the objective
     objectiveText: Phaser.GameObjects.Text;
@@ -23,7 +26,7 @@ export default class StartScene extends Phaser.Scene {
 
     create() {
         //Adding scene variable for passing in scene to objects
-        var thisScene = this;
+        const thisScene = this;
         // dummy data to avoid undefined error on first use of cycleDialogue()
         this.bubbleData = { bubbleNum: 0, showBubble: {} };
         // Spawn in the background and CAT image
@@ -166,10 +169,37 @@ export default class StartScene extends Phaser.Scene {
         terminalInput.style.paddingLeft = "28px";
         terminalInput.style.fontSize = terminalFontSize;
         this.game.canvas.parentNode?.appendChild(terminalInput);
-        terminalInput.addEventListener("change", () => {
-            blip.play();
-            this.parseCommand(terminalInput.value);
-            terminalInput.value = "";
+        terminalInput.addEventListener("keydown", (event) => {
+            if (event.code === "Enter") {
+                blip.play();
+
+                const text = terminalInput.value.trim();
+                if (this.terminalHistory.length === 0 || (this.terminalHistory.length > 0 && this.terminalHistory[this.terminalHistory.length - 1] !== text)) {
+                    this.terminalHistory.push(text);
+                }
+                if (this.terminalHistory.length > MAX_TERMINAL_HISTORY) {
+                    this.terminalHistory.splice(0, 1);
+                }
+
+                this.parseCommand(terminalInput.value);
+                terminalInput.value = "";
+            } else if (event.code === "ArrowUp") {
+                if (this.terminalHistory.length - this.terminalHistoryIndex > 0) {
+                    this.terminalHistoryIndex++;
+                    terminalInput.value = this.terminalHistory[this.terminalHistory.length - this.terminalHistoryIndex];
+                }
+            } else if (event.code === "ArrowDown") {
+                if (this.terminalHistoryIndex > 0) {
+                    this.terminalHistoryIndex--;
+                    if (this.terminalHistoryIndex === 0) {
+                        terminalInput.value = "";
+                    } else {
+                        terminalInput.value = this.terminalHistory[this.terminalHistory.length - this.terminalHistoryIndex];
+                    }
+                }
+            } else {
+                this.terminalHistoryIndex = 0;
+            }
         });
         // -- Text
         const terminalHistoryParent = document.createElement("div");
@@ -203,6 +233,13 @@ export default class StartScene extends Phaser.Scene {
             720 - terminalInputHeight / 2,
             terminalInput,
         );
+    }
+
+    get lastCommand(): string {
+        if (this.terminalHistory.length === 0) {
+            return "";
+        }
+        return this.terminalHistory[this.terminalHistory.length - 1];
     }
 
     // for opening file animation
@@ -365,7 +402,7 @@ export default class StartScene extends Phaser.Scene {
                 this.setObjective("Make the terminal say 'cat'!");
                 break;
             case 11:
-                if (this.lastCommandRun == "echo cat") {
+                if (this.lastCommand === "echo cat") {
                     showBubble = this.createSpeechBubble(
                         1060,
                         400,
@@ -438,7 +475,7 @@ export default class StartScene extends Phaser.Scene {
                 break;
             case 15:
                 // check if the player did it right
-                if (this.lastCommandRun == "cat instructions.txt") {
+                if (this.lastCommand === "cat instructions.txt") {
                     showBubble = this.createSpeechBubble(
                         1060,
                         400,
@@ -525,7 +562,7 @@ export default class StartScene extends Phaser.Scene {
             case 20:
                 // check if the player did it right
                 // TODO: must compare output for this one
-                if (this.lastCommandRun == "cat log4-15-2024.txt") {
+                if (this.lastCommand === "cat log4-15-2024.txt") {
                     showBubble = this.createSpeechBubble(
                         1060,
                         400,
@@ -573,7 +610,7 @@ export default class StartScene extends Phaser.Scene {
             case 22:
                 // check if the player did it right
                 // TODO: must compare output for this one
-                if (this.lastCommandRun == "cat baller.txt") {
+                if (this.lastCommand === "cat baller.txt") {
                     showBubble = this.createSpeechBubble(
                         1060,
                         400,
@@ -739,8 +776,6 @@ export default class StartScene extends Phaser.Scene {
         }
 
         text = text.trim();
-        // CAT checks this to see if it's right
-        this.lastCommandRun = text;
 
         // todo: need to improve output
         const addOutput = (output: string) => {
