@@ -170,6 +170,15 @@ export default class StartScene extends Phaser.Scene {
         terminalInput.style.fontSize = terminalFontSize;
         this.game.canvas.parentNode?.appendChild(terminalInput);
         terminalInput.addEventListener("keydown", (event) => {
+            const setInputText = (text: string) => {
+                terminalInput.focus();
+                terminalInput.value = text;
+                // Set a timeout because the up arrow key wants to move the cursor to the front
+                setTimeout(() => {
+                    terminalInput.setSelectionRange(terminalInput.value.length, terminalInput.value.length);
+                }, 1);
+            };
+
             if (event.code === "Enter") {
                 blip.play();
 
@@ -182,19 +191,19 @@ export default class StartScene extends Phaser.Scene {
                 }
 
                 this.parseCommand(terminalInput.value);
-                terminalInput.value = "";
+                setInputText("");
             } else if (event.code === "ArrowUp") {
                 if (this.terminalHistory.length - this.terminalHistoryIndex > 0) {
                     this.terminalHistoryIndex++;
-                    terminalInput.value = this.terminalHistory[this.terminalHistory.length - this.terminalHistoryIndex];
+                    setInputText(this.terminalHistory[this.terminalHistory.length - this.terminalHistoryIndex]);
                 }
             } else if (event.code === "ArrowDown") {
                 if (this.terminalHistoryIndex > 0) {
                     this.terminalHistoryIndex--;
                     if (this.terminalHistoryIndex === 0) {
-                        terminalInput.value = "";
+                        setInputText("");
                     } else {
-                        terminalInput.value = this.terminalHistory[this.terminalHistory.length - this.terminalHistoryIndex];
+                        setInputText(this.terminalHistory[this.terminalHistory.length - this.terminalHistoryIndex]);
                     }
                 }
             } else {
