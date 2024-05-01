@@ -751,11 +751,15 @@ export default class StartScene extends Phaser.Scene {
         addOutput("");
 
         const commandParts = text.split(" ");
+        while (commandParts.length < 2) {
+            // no undefined errors on my watch
+            commandParts.push("");
+        }
         for (let commandPart of commandParts) {
             commandPart = commandPart.trim();
         }
-        const command = commandParts[0];
-        switch (command) {
+
+        switch (commandParts[0]) {
             case "clear": {
                 addOutput("");
                 return;
@@ -765,22 +769,27 @@ export default class StartScene extends Phaser.Scene {
                 const dirContents = CATFS.readCWD();
                 console.log(dirContents);
                 for (const name of dirContents.dirs) {
-                    const colorClass = "terminal-span-dir-color";
-                    output += `<span class="${colorClass}">${name}</span>\n`;
+                    output += `<span class="terminal-span-dir-color">${name}/</span>\n`;
                 }
                 for (const name of dirContents.zips) {
-                    const colorClass = "terminal-span-zip-color";
-                    output += `<span class="${colorClass}">${name}</span>\n`;
+                    output += `<span class="terminal-span-zip-color">${name}</span>\n`;
                 }
                 for (const name of dirContents.files) {
-                    const colorClass = "terminal-span-file-color";
-                    output += `<span class="${colorClass}">${name}</span>\n`;
+                    output += `<span class="terminal-span-file-color">${name}</span>\n`;
                 }
                 addOutput(output);
                 return;
             }
             case "unzip": {
-                // todo: unzip
+                if (!CATFS.extractZip(commandParts[1])) {
+                    addOutput(
+                        `Could not find the zip file at "${commandParts[1]}".`,
+                    );
+                } else {
+                    addOutput(
+                        "Extracted the zip file.",
+                    )
+                }
                 return;
             }
             case "cat": {
@@ -818,7 +827,7 @@ export default class StartScene extends Phaser.Scene {
                 return;
             }
             default: {
-                addOutput(`Unknown command "${command}".`);
+                addOutput(`Unknown command "${commandParts[0]}".`);
                 return;
             }
         }

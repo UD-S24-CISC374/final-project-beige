@@ -18,11 +18,12 @@ export class CatFS {
     }
 
     set cwd(path: string) {
-        console.log(`setting path to ${path}`);
+        if (path.includes(".zip")) {
+            // easy way to not go into zips, lol
+            return;
+        }
         path = this.#makePathAbsolute(path);
-        console.log(`setting path to ${path}`);
         if (this.exists(path)) {
-            console.log(`setting path to ${path}`);
             this.#cwd = path;
         }
     }
@@ -80,7 +81,6 @@ export class CatFS {
         // Check for a directory
         for (const filepath of Object.keys(this.#files)) {
             if (filepath.length > path.length && filepath.startsWith(path) && filepath.at(path.length) === "/") {
-                console.log("yep ");
                 return true;
             }
         }
@@ -104,10 +104,6 @@ export class CatFS {
         return "";
     }
 
-    readCWD(): CatFSDirContents {
-        return this.readDir(".");
-    }
-
     readDir(path: string): CatFSDirContents {
         path = this.#makePathAbsolute(path);
         const out: CatFSDirContents = {
@@ -118,8 +114,14 @@ export class CatFS {
         const processPath = (filepath: string) => {
             if (filepath.includes("/")) {
                 filepath = filepath.substring(0, filepath.indexOf("/"));
-                if (!out.dirs.includes(filepath)) {
-                    out.dirs.push(filepath);
+                if (filepath.endsWith(".zip")) {
+                    if (!out.zips.includes(filepath)) {
+                        out.zips.push(filepath);
+                    }
+                } else {
+                    if (!out.dirs.includes(filepath)) {
+                        out.dirs.push(filepath);
+                    }
                 }
             } else {
                 if (!out.files.includes(filepath)) {
@@ -140,6 +142,78 @@ export class CatFS {
             }
         }
         return out;
+    }
+
+    readCWD(): CatFSDirContents {
+        return this.readDir(".");
+    }
+
+    createFile(path: string, contents: string): void {
+        path = this.#makePathAbsolute(path);
+        this.#files[path] = contents;
+    }
+
+    deleteFile(path: string): boolean {
+        path = this.#makePathAbsolute(path);
+        if (!this.exists(path)) {
+            return false;
+        }
+        delete this.#files[path];
+        return true;
+    }
+
+    deleteDir(path: string): boolean {
+        path = this.#makePathAbsolute(path);
+        if (!this.exists(path)) {
+            return false;
+        }
+        for (const filepath of Object.keys(this.#files)) {
+            if (filepath.startsWith(path)) {
+                this.deleteFile(filepath);
+            }
+        }
+        return true;
+    }
+
+    renameFile(oldPath: string, newPath: string): boolean {
+        oldPath = this.#makePathAbsolute(oldPath);
+        newPath = this.#makePathAbsolute(newPath);
+
+        // It must exist
+        if (!this.exists(oldPath)) {
+            return false;
+        }
+
+        // Delete + recreate
+        const contents = this.readFile(oldPath);
+        this.deleteFile(oldPath);
+        this.createFile(newPath, contents);
+        return true;
+    }
+
+    renameDir(oldPath: string, newPath: string): boolean {
+        oldPath = this.#makePathAbsolute(oldPath);
+        newPath = this.#makePathAbsolute(newPath);
+
+        if (!this.exists(oldPath)) {
+            return false;
+        }
+
+        for (const filepath of Object.keys(this.#files)) {
+            if (filepath.startsWith(oldPath)) {
+                this.renameFile(filepath, filepath.replace(oldPath, newPath));
+            }
+        }
+        return true;
+    }
+
+    extractZip(path: string): boolean {
+        path = this.#makePathAbsolute(path);
+        if (!path.endsWith(".zip") || !this.exists(path)) {
+            return false;
+        }
+        this.renameDir(path, path.substring(0, path.indexOf(".zip")));
+        return true;
     }
 }
 
