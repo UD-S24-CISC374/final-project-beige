@@ -6,6 +6,8 @@ export default class PreloadScene extends Phaser.Scene {
     }
 
     preload() {
+        this.load.image("title", "assets/img/title.png");
+        this.load.image("end", "assets/img/end.png");
         this.load.image("desktopBG", "assets/img/xpbg.jpg");
         this.load.image("CAT", "assets/img/CAT shadeless-export big.png");
         // desktop icon assets
@@ -13,14 +15,17 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.image("unlocked program", "assets/img/unlocked file.png");
         this.load.image("x", "assets/img/x.png");
         this.load.image("locked text", "assets/img/locked text file.png");
+        this.load.image("r locked text", "assets/img/redlocktext.png");
+        this.load.image("r locked program", "assets/img/redlockprogram.png");
         this.load.image("unlocked text", "assets/img/unlocked text file.png");
         this.load.image("article1", "assets/img/window.png");
         this.load.audio("lockedfile", "assets/sounds/hitnoise.mp3");
         this.load.audio("blip", "assets/sounds/blip.mp3");
         this.load.audio("pop", "assets/sounds/pop.mp3");
+        this.load.audio("background", "assets/sounds/background.mp3");
     }
 
     create() {
-        this.scene.start("StartScene");
+        this.scene.start("TitleScene");
     }
 }

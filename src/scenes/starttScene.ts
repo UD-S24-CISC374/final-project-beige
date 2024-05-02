@@ -1,169 +1,20 @@
 import * as cowsay from "cowsay";
 import Phaser from "phaser";
+import { CATFS } from "../fs/CatFS";
 import TextFile from "../objects/textFile";
 import ProgramFile from "../objects/programFile";
 // CODE FOR createSpeechBubbles() HEAVILY REFERENCED FROM HERE: https://github.com/phaserjs/examples/blob/master/public/src/game%20objects/text/speech%20bubble.js
 
-// FILESYSTEM CODE BEGIN -----
-type CatFile = {
-    type: "file";
-    contents: string;
-    children: {
-        // This should always be empty, it's just here for type-safe indexing
-        [childName: string]: CatFile;
-    };
-};
-
-type CatZip = {
-    type: "zip";
-    extracted: boolean;
-    children: {
-        [childName: string]: CatFile;
-    };
-};
-
-type CatDir = {
-    type: "dir";
-    parent?: string | undefined;
-    children: {
-        [childName: string]: CatFile | CatZip | CatDir;
-    };
-};
-
-type CatEntry = CatDir | CatZip | CatFile;
-
-const THE_ENTIRE_DAMN_CAT_FILESYSTEM: CatDir = {
-    type: "dir",
-    children: {
-        logs: {
-            type: "dir",
-            children: {
-                "log4-15-2024.txt": {
-                    type: "file",
-                    contents: `wizard56: Can we really do this? That's awesome!
-lizard58: Of course we can, we'll just need a name.
-lizard58: There's no way we can get caught.
-wizard56: But we need justice for our friend.
-lizard58: Exactly. I've got just the name for us.
-wizard56: Wait hold on who let you pick the name?
-lizard58: Me, I'm literally the guy who has coding experience here dummy!!
-wizard56: Man I wanna pick the name, Im great at naming things.
-lizard58: No way am I letting you name our alias.
-lizard58: You'll name us a number or something stupid.`,
-                    children: {},
-                },
-                "baller.txt": {
-                    type: "file",
-                    contents: `It's time to learn some BALLER techniques.
-
-You ever feel trapped in a directory? With no way to get out?
-Well boy do I have a command for you!
-INTRODUCING "cd .." This will change your directory to the one you were in previously! Incredible!
-
-You ever encounter a directory that ends in .zip? With no way to open it?
-Well girl do I have a command for you!
-INTRODUCING "unzip DIRECTORY.zip" This will unzip that directory so you can get to explorin it!`,
-                    children: {},
-                },
-                "dir2.zip": {
-                    type: "zip",
-                    extracted: false,
-                    children: {
-                        "rm.txt": {
-                            type: "file",
-                            contents: `wizard56: Duuuuuuuuuuuuuuuude I accidentally made a virus.
-lizard58: HOW DO YOU JUST *MAKE* A VIRUS???
-wizard56: Idk dude but I need to remove it STAT.
-lizard58: Ohhhhhhhhh boy ok. Use the rm command.
-wizard56: rm? That stand for remove?
-lizard58: YES YOU TYPE IN rm AND THEN WHAT YOU WANT TO REMOVE
-wizard56: So like "rm virus"?
-lizard58: IF YOU ACTUALLY NAMED YOUR VIRUS virus THEN YES. YES.
-wizard56: Thank you :)
-lizard58: I'm going to rm you in a second.`,
-                            children: {},
-                        },
-                        "log4-20-2024.txt": {
-                            type: "file",
-                            contents: `lizard58: Alright it's done!
-wizard56: YES! THEY'LL NEVER KNOW WHO HIT EM!
-lizard58: The articles will be CRAZY after this one.
-lizard58: We should lock them up in case our logs get out.
-wizard56: Ooh ooh! Ok I'll make a program that can lock it!
-lizard58: Ok I'll leave it to you, we just have to hope no one gets rid of it.
-wizard56: Nah that would never happen, we're too cool.
-lizard58: Soon we'll have justice :)
-wizard56: <:D`,
-                            children: {},
-                        },
-                    },
-                },
-            },
-        },
-        "instructions.txt": {
-            type: "file",
-            contents: `Let's learn some commands!
-
-echo TEXT: Have the terminal 'say' the TEXT that you enter.
-        Ex: "echo haha" would make the terminal say "haha"
-
-cd DIRECTORY: Navigate to a new DIRECTORY with new files!
-
-cat FILE: Read a FILE that you choose in the terminal!
-
-ls: Lists everything in your current directory!`,
-            children: {},
-        },
-    },
-};
-
-const fsListItemsInZip = (zip: CatZip): { [name: string]: CatFile } => {
-    const out: { [name: string]: CatFile } = {};
-    for (const [fileName, item] of Object.entries(zip.children)) {
-        out[fileName] = item;
-    }
-    return out;
-};
-
-const fsListItemsInDirectory = (dir: CatDir): { [name: string]: CatEntry } => {
-    const out: { [name: string]: CatEntry } = {};
-    for (const [itemName, item] of Object.entries(dir.children)) {
-        if (item.type === "zip" && item.extracted) {
-            const zipContents = fsListItemsInZip(item);
-            for (const [fileName, file] of Object.entries(zipContents)) {
-                out[fileName] = file;
-            }
-        } else {
-            out[itemName] = item;
-        }
-    }
-    return out;
-};
-
-const fsExtractZip = (zip: CatZip) => {
-    zip.extracted = true;
-};
-
-const fsReadFile = (file: CatEntry, cleanHTML: boolean = false) => {
-    if (file.type !== "file") {
-        return `Error: attempted to read a file, but was actually reading a ${file.type}!`;
-    }
-    if (!cleanHTML) {
-        return file.contents;
-    }
-    return file.contents
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;");
-};
-// FILESYSTEM CODE END -----
+const MAX_TERMINAL_HISTORY = 512;
 
 export default class StartScene extends Phaser.Scene {
     // this will have a number corresponding to the speech bubble 'ID' and an object containing the speech bubble graphics to display
     bubbleData: object;
-    lastCommandRun: string;
     lastOutput: string;
-    currentDirectory: CatDir;
+    commandCount: number;
+    hint6: boolean;
+    terminalHistory: string[] = [];
+    terminalHistoryIndex: number = 0;
     CAT: Phaser.GameObjects.Sprite;
     // this is the objective
     objectiveText: Phaser.GameObjects.Text;
@@ -177,9 +28,11 @@ export default class StartScene extends Phaser.Scene {
 
     create() {
         //Adding scene variable for passing in scene to objects
-        var thisScene = this;
+        const thisScene = this;
         // dummy data to avoid undefined error on first use of cycleDialogue()
         this.bubbleData = { bubbleNum: 0, showBubble: {} };
+        this.commandCount = 0;
+        this.hint6 = false;
         // Spawn in the background and CAT image
         this.add.image(400, 300, "desktopBG");
         this.CAT = this.add.sprite(1100, 600, "CAT");
@@ -188,6 +41,10 @@ export default class StartScene extends Phaser.Scene {
         // GLOBL SOUNDS
         let pop = this.sound.add("pop");
         let blip = this.sound.add("blip");
+        let backgroundLoop = this.sound.add("background");
+        backgroundLoop.setLoop(true);
+        backgroundLoop.setVolume(0.3);
+        backgroundLoop.play();
 
         // Make CAT clickable
         this.CAT.setInteractive();
@@ -256,7 +113,7 @@ export default class StartScene extends Phaser.Scene {
 
         //Create Locked Program which cannot be accessed
         this.murderArticle = this.add
-            .image(100, 100, "locked program")
+            .image(100, 100, "unlocked program")
             .setInteractive();
 
         this.murderArticle.on("pointerup", () => {
@@ -265,7 +122,7 @@ export default class StartScene extends Phaser.Scene {
 
         //Create Locked Text File which cannot be accessed
         const locked_txt = this.add
-            .image(200, 100, "locked text")
+            .image(200, 100, "r locked text")
             .setInteractive();
         locked_txt.on("pointerdown", function () {
             locked_txt.setTint(0xff6666);
@@ -274,6 +131,17 @@ export default class StartScene extends Phaser.Scene {
         locked_txt.on("pointerup", function () {
             locked_txt.clearTint();
         });
+        //Create Red Locked Program
+        const r_locked_prg = this.add
+            .image(300, 100, "r locked program")
+            .setInteractive();
+        r_locked_prg.on("pointerdown", function () {
+            r_locked_prg.setTint(0xff6666);
+            lockedsfx.play();
+        });
+        r_locked_prg.on("pointerup", function () {
+            r_locked_prg.clearTint();
+        });
         //Create Text File which CAN be accessed
         const txt1 = this.add.image(100, 200, "unlocked text").setInteractive();
         txt1.on("pointerdown", function () {
@@ -281,11 +149,7 @@ export default class StartScene extends Phaser.Scene {
         });
         txt1.on("pointerup", () => {
             txt1.clearTint();
-            makeTxtFile(
-                fsReadFile(
-                    THE_ENTIRE_DAMN_CAT_FILESYSTEM.children["instructions.txt"],
-                ),
-            );
+            makeTxtFile(CATFS.readFile("/home/instructions.txt"));
         });
         // SPEECH
         // switch cases are used to determine which speech bubble to display/destory
@@ -320,10 +184,68 @@ export default class StartScene extends Phaser.Scene {
         terminalInput.style.paddingLeft = "28px";
         terminalInput.style.fontSize = terminalFontSize;
         this.game.canvas.parentNode?.appendChild(terminalInput);
-        terminalInput.addEventListener("change", () => {
-            blip.play();
-            this.parseCommand(terminalInput.value);
-            terminalInput.value = "";
+        terminalInput.addEventListener("keydown", (event) => {
+            const setInputText = (text: string) => {
+                terminalInput.focus();
+                terminalInput.value = text;
+                // Set a timeout because the up arrow key wants to move the cursor to the front
+                setTimeout(() => {
+                    terminalInput.setSelectionRange(
+                        terminalInput.value.length,
+                        terminalInput.value.length,
+                    );
+                }, 1);
+            };
+
+            if (event.code === "Enter") {
+                blip.play();
+
+                const text = terminalInput.value.trim();
+                if (
+                    this.terminalHistory.length === 0 ||
+                    (this.terminalHistory.length > 0 &&
+                        this.terminalHistory[
+                            this.terminalHistory.length - 1
+                        ] !== text)
+                ) {
+                    this.terminalHistory.push(text);
+                }
+                if (this.terminalHistory.length > MAX_TERMINAL_HISTORY) {
+                    this.terminalHistory.splice(0, 1);
+                }
+
+                this.parseCommand(terminalInput.value);
+                setInputText("");
+            } else if (event.code === "ArrowUp") {
+                if (
+                    this.terminalHistory.length - this.terminalHistoryIndex >
+                    0
+                ) {
+                    this.terminalHistoryIndex++;
+                    setInputText(
+                        this.terminalHistory[
+                            this.terminalHistory.length -
+                                this.terminalHistoryIndex
+                        ],
+                    );
+                }
+            } else if (event.code === "ArrowDown") {
+                if (this.terminalHistoryIndex > 0) {
+                    this.terminalHistoryIndex--;
+                    if (this.terminalHistoryIndex === 0) {
+                        setInputText("");
+                    } else {
+                        setInputText(
+                            this.terminalHistory[
+                                this.terminalHistory.length -
+                                    this.terminalHistoryIndex
+                            ],
+                        );
+                    }
+                }
+            } else {
+                this.terminalHistoryIndex = 0;
+            }
         });
         // -- Text
         const terminalHistoryParent = document.createElement("div");
@@ -357,8 +279,13 @@ export default class StartScene extends Phaser.Scene {
             720 - terminalInputHeight / 2,
             terminalInput,
         );
-        // -- Finalize
-        this.currentDirectory = THE_ENTIRE_DAMN_CAT_FILESYSTEM;
+    }
+
+    get lastCommand(): string {
+        if (this.terminalHistory.length === 0) {
+            return "";
+        }
+        return this.terminalHistory[this.terminalHistory.length - 1];
     }
 
     // for opening file animation
@@ -521,7 +448,7 @@ export default class StartScene extends Phaser.Scene {
                 this.setObjective("Make the terminal say 'cat'!");
                 break;
             case 11:
-                if (this.lastCommandRun == "echo cat") {
+                if (this.lastCommand === "echo cat") {
                     showBubble = this.createSpeechBubble(
                         1060,
                         400,
@@ -594,7 +521,7 @@ export default class StartScene extends Phaser.Scene {
                 break;
             case 15:
                 // check if the player did it right
-                if (this.lastCommandRun == "cat instructions.txt") {
+                if (this.lastCommand === "cat instructions.txt") {
                     showBubble = this.createSpeechBubble(
                         1060,
                         400,
@@ -669,7 +596,7 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "Use the instructions to find and read out the file named ‘log4-15-2024.txt’.",
+                    "Use the instructions to find and read the file ‘log4-15-2024.txt’.",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
@@ -681,7 +608,7 @@ export default class StartScene extends Phaser.Scene {
             case 20:
                 // check if the player did it right
                 // TODO: must compare output for this one
-                if (this.lastCommandRun == "cat log4-15-2024.txt") {
+                if (this.lastCommand === "cat log4-15-2024.txt") {
                     showBubble = this.createSpeechBubble(
                         1060,
                         400,
@@ -729,7 +656,7 @@ export default class StartScene extends Phaser.Scene {
             case 22:
                 // check if the player did it right
                 // TODO: must compare output for this one
-                if (this.lastCommandRun == "cat baller.txt") {
+                if (this.lastCommand === "cat baller.txt") {
                     showBubble = this.createSpeechBubble(
                         1060,
                         400,
@@ -801,6 +728,61 @@ export default class StartScene extends Phaser.Scene {
                 Object.values(showBubble)[0].visible = true;
                 // make the text object visible
                 Object.values(showBubble)[1].visible = true;
+                break;
+            // CAT CHIMES IN START
+            case 2000:
+                showBubble = this.createSpeechBubble(
+                    1060,
+                    400,
+                    200,
+                    100,
+                    "Don't you have a file you can go learn to unzip?",
+                );
+                // make the white bubble graphic visible
+                Object.values(showBubble)[0].visible = true;
+                // make the text object visible
+                Object.values(showBubble)[1].visible = true;
+                break;
+            case 4000:
+                showBubble = this.createSpeechBubble(
+                    1060,
+                    400,
+                    200,
+                    100,
+                    "Instead of making the computer shake by hitting your keyboard so hard--",
+                );
+                // make the white bubble graphic visible
+                Object.values(showBubble)[0].visible = true;
+                // make the text object visible
+                Object.values(showBubble)[1].visible = true;
+                break;
+            case 4001:
+                showBubble = this.createSpeechBubble(
+                    1060,
+                    400,
+                    200,
+                    100,
+                    "--you go try to remove some locks instead? Knock yourself out. Please.",
+                );
+                // make the white bubble graphic visible
+                Object.values(showBubble)[0].visible = true;
+                // make the text object visible
+                Object.values(showBubble)[1].visible = true;
+                this.setObjective("Stop annoying CAT.");
+                break;
+            case 6000:
+                showBubble = this.createSpeechBubble(
+                    1060,
+                    400,
+                    200,
+                    100,
+                    "Stop typing and go read something new. Seriously. Jeez.",
+                );
+                // make the white bubble graphic visible
+                Object.values(showBubble)[0].visible = true;
+                // make the text object visible
+                Object.values(showBubble)[1].visible = true;
+                this.setObjective("STOP ANNOYING CAT WHILE THEY WORK.");
                 break;
         }
         bubbleNum = bubbleNum + 1;
@@ -885,6 +867,7 @@ export default class StartScene extends Phaser.Scene {
     }
 
     parseCommand(text: string) {
+        this.commandCount = this.commandCount + 1;
         if (text.length === 0) {
             return;
         }
@@ -895,8 +878,6 @@ export default class StartScene extends Phaser.Scene {
         }
 
         text = text.trim();
-        // CAT checks this to see if it's right
-        this.lastCommandRun = text;
 
         // todo: need to improve output
         const addOutput = (output: string) => {
@@ -904,60 +885,95 @@ export default class StartScene extends Phaser.Scene {
             // CAT checks this for some commands
             this.lastOutput = output.trim();
         };
+        addOutput("");
+
+        // Call CAT's chiming in
+        if (Object.values(this.bubbleData)[0] > 25) {
+            console.log("COMMAND COUNTER: ", this.commandCount);
+            console.log("RM.TXT: ", CATFS.exists("/home/logs/dir2/rm.txt"));
+            console.log("REDLOCK: ", !CATFS.exists("/redlock.lock"));
+            // check for a specific thing from each task
+            //TASK 5 HINT
+            if (
+                this.commandCount % 7 == 0 &&
+                CATFS.exists("/home/logs/dir2.zip")
+            ) {
+                this.bubbleData = {
+                    //2000 is an arbitrary number just to make sure the player doesn't spam click to get to CAT's next Undertale-style switch case
+                    bubbleNum: 2000,
+                    showBubble: {},
+                };
+                // TASK 6 HINT
+            } else if (
+                this.commandCount % 13 == 0 &&
+                CATFS.exists("/home/logs/dir2/rm.txt") &&
+                !this.hint6
+            ) {
+                this.bubbleData = {
+                    bubbleNum: 4000,
+                    showBubble: {},
+                };
+                this.hint6 = true;
+                // TASK 7 HINT
+            } else if (
+                this.commandCount % 13 == 0 &&
+                !CATFS.exists("/redlock.lock")
+            ) {
+                this.bubbleData = {
+                    bubbleNum: 6000,
+                    showBubble: {},
+                };
+            }
+            this.cycleDialogue(
+                Object.values(this.bubbleData)[0],
+                Object.values(this.bubbleData)[1],
+            );
+        }
 
         const commandParts = text.split(" ");
+        while (commandParts.length < 2) {
+            // no undefined errors on my watch
+            commandParts.push("");
+        }
         for (let commandPart of commandParts) {
             commandPart = commandPart.trim();
         }
-        const command = commandParts[0];
-        switch (command) {
+
+        switch (commandParts[0]) {
             case "clear": {
                 addOutput("");
                 return;
             }
             case "ls": {
                 let output = "";
-                for (const [name, item] of Object.entries(
-                    fsListItemsInDirectory(this.currentDirectory),
-                )) {
-                    let colorClass: string;
-                    switch (item.type) {
-                        case "file":
-                            colorClass = "terminal-span-file-color";
-                            break;
-                        case "zip":
-                            colorClass = "terminal-span-zip-color";
-                            break;
-                        case "dir":
-                            colorClass = "terminal-span-dir-color";
-                            break;
+                const dirContents = CATFS.readCWD();
+                console.log(dirContents);
+                for (const name of dirContents.dirs) {
+                    output += `<span class="terminal-span-dir-color">${name}/</span>\n`;
+                }
+                for (const name of dirContents.zips) {
+                    output += `<span class="terminal-span-zip-color">${name}</span>\n`;
+                }
+                for (const name of dirContents.files) {
+                    if (name == "redlock.lock") {
+                        output += `<span class="terminal-span-lock-color">${name}/</span>\n`;
+                    } else if (name == "cat.exe") {
+                        output += `<span class="terminal-span-cat-color">${name}</span>\n`;
+                    } else {
+                        output += `<span class="terminal-span-file-color">${name}</span>\n`;
                     }
-                    output += `<span class="${colorClass}">${name}</span>\n`;
                 }
                 addOutput(output);
                 return;
             }
             case "unzip": {
-                if (commandParts.length <= 1) {
+                if (!CATFS.extractZip(commandParts[1])) {
                     addOutput(
-                        'Command "unzip" needs to know what zip file you want to unzip.',
+                        `Could not find the zip file at "${commandParts[1]}".`,
                     );
-                    return;
+                } else {
+                    addOutput("Extracted the zip file.");
                 }
-                for (const [name, item] of Object.entries(
-                    fsListItemsInDirectory(this.currentDirectory),
-                )) {
-                    if (name === commandParts[1] && item.type === "zip") {
-                        fsExtractZip(item);
-                        addOutput(
-                            `Successfully unzipped file called "${name}"!`,
-                        );
-                        return;
-                    }
-                }
-                addOutput(
-                    `Command "unzip" could not find a zip file called "${commandParts[1]}".`,
-                );
                 return;
             }
             case "cat": {
@@ -967,46 +983,17 @@ export default class StartScene extends Phaser.Scene {
                     );
                     return;
                 }
-                for (const [name, item] of Object.entries(
-                    fsListItemsInDirectory(this.currentDirectory),
-                )) {
-                    if (name === commandParts[1] && item.type === "file") {
-                        addOutput(fsReadFile(item, true));
-                        return;
-                    }
+                if (!CATFS.exists(commandParts[1])) {
+                    addOutput(
+                        `Command "cat" could not find a file called "${commandParts[1]}".`,
+                    );
+                    return;
                 }
-                addOutput(
-                    `Command "cat" could not find a file called "${commandParts[1]}".`,
-                );
+                addOutput(CATFS.readFile(commandParts[1], true));
                 return;
             }
             case "cd": {
-                // todo: this is dependent on the fs being how it is, delete this code and rewrite it asap
-                // this gives "remove before E3 2003" source engine comment vibes
-                if (
-                    this.currentDirectory === THE_ENTIRE_DAMN_CAT_FILESYSTEM &&
-                    commandParts[1] == "logs"
-                ) {
-                    const logs =
-                        THE_ENTIRE_DAMN_CAT_FILESYSTEM.children["logs"];
-                    if (logs.type !== "dir") {
-                        // will never happen
-                        return;
-                    }
-                    this.currentDirectory = logs;
-                    addOutput('Set current directory to "/logs/".');
-                } else if (
-                    this.currentDirectory ===
-                        THE_ENTIRE_DAMN_CAT_FILESYSTEM.children["logs"] &&
-                    commandParts[1] == ".."
-                ) {
-                    this.currentDirectory = THE_ENTIRE_DAMN_CAT_FILESYSTEM;
-                    addOutput('Set current directory to "/".');
-                } else {
-                    addOutput(
-                        `Could not change directory: directory "${commandParts[1]}" doesn't exist.`,
-                    );
-                }
+                CATFS.cwd = commandParts[1];
                 return;
             }
             case "echo": {
@@ -1017,13 +1004,27 @@ export default class StartScene extends Phaser.Scene {
                 addOutput(
                     cowsay.say({
                         text: text.substring(6).trim(),
-                        //f: 'kitty',
                     }),
                 );
                 return;
             }
+            case "rm": {
+                if (CATFS.exists(commandParts[1])) {
+                    CATFS.deleteFile(commandParts[1]);
+                    if(commandParts[1] == "cat.exe"){
+                        this.scene.stop();
+                        this.scene.start("EndScene");
+                    }
+                    else if(commandParts[1] == "redlock.lock/"){
+                        console.log("REMOVE RED LOCKS HERE")
+                    }
+                } else {
+                    addOutput(`File "${commandParts[1]} does not exist"`);
+                }
+                return;
+            }
             default: {
-                addOutput(`Unknown command "${command}".`);
+                addOutput(`Unknown command "${commandParts[0]}".`);
                 return;
             }
         }
