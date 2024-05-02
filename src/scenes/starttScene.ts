@@ -39,6 +39,10 @@ export default class StartScene extends Phaser.Scene {
         // GLOBL SOUNDS
         let pop = this.sound.add("pop");
         let blip = this.sound.add("blip");
+        let backgroundLoop = this.sound.add("background");
+        backgroundLoop.setLoop(true);
+        backgroundLoop.setVolume(0.3);
+        backgroundLoop.play();
 
         // Make CAT clickable
         this.CAT.setInteractive();
