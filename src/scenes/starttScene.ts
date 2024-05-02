@@ -122,13 +122,24 @@ export default class StartScene extends Phaser.Scene {
 
         //Create Locked Text File which cannot be accessed
         const locked_txt = this.add
-            .image(200, 100, "locked text")
+            .image(200, 100, "r locked text")
             .setInteractive();
         locked_txt.on("pointerdown", function () {
             locked_txt.setTint(0xff6666);
             lockedsfx.play();
         });
         locked_txt.on("pointerup", function () {
+            locked_txt.clearTint();
+        });
+        //Create Red Locked Program
+        const r_locked_prg = this.add
+            .image(300, 100, "r locked program")
+            .setInteractive();
+        r_locked_prg.on("pointerdown", function () {
+            locked_txt.setTint(0xff6666);
+            lockedsfx.play();
+        });
+        r_locked_prg.on("pointerup", function () {
             locked_txt.clearTint();
         });
         //Create Text File which CAN be accessed
