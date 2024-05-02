@@ -895,12 +895,14 @@ export default class StartScene extends Phaser.Scene {
                 // TASK 6 HINT
             } else if (
                 this.commandCount % 13 == 0 &&
-                CATFS.exists("/home/logs/dir2/rm.txt")
+                CATFS.exists("/home/logs/dir2/rm.txt") &&
+                !this.hint6
             ) {
                 this.bubbleData = {
                     bubbleNum: 4000,
                     showBubble: {},
                 };
+                this.hint6 = true;
                 // TASK 7 HINT
             } else if (
                 this.commandCount % 13 == 0 &&
