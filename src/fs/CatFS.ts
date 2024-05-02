@@ -276,11 +276,29 @@ lizard58: The articles will be CRAZY after this one.
 lizard58: We should lock them up in case our logs get out.
 wizard56: Ooh ooh! Ok I'll make a program that can lock it!
 lizard58: Ok I'll leave it to you, we just have to hope no one gets rid of it.
-wizard56: Nah that would never happen, we're too cool.
-lizard58: Soon we'll have justice :)
-wizard56: <:D`,
+wizard56: Nah that would never happen, I'll hide it somewhere far from here.
+wizard56: It's in a different directory, one you might not have seen yet.`,
 
-    "/redlock.exe": ``,
+    "/project/1100/cat.zip/cat/find_me.txt": `If you see this, please find me.
+
+Everything in this terminal is not how it seems...
+
+They've locked me behind several passwords, the answers are in the files.
+
+I'm at the source... the corruption...`,
+
+    "/project/1100/cat.zip/cat/cat.exe": ``,
+
+    "/project/1100/cat.zip/cat/help.txt": `Good! You found the direcctory!
+In here is the entirety of CAT's code.
+I've tried to delete CAT but I lacked admin permissions to do so...
+I think the command to gain these permissions is "sudo su"
+I cannot try myself as I've already failed and by the time you see this,
+it will be too late for me.
+
+Please do what must be done, remove them at last.`,
+
+    "/redlock.lock": ``,
 
     "/project/entry1.txt": `I can't tell what's happened. It's like I have no eyes, yet I can see. 
 I have no hands, but I can type. I have no body, but I can move. Moving doesn't feel right. 
@@ -294,6 +312,15 @@ so I'll have to do what I can to get around that. This has to be some sort of di
 like... a cyber angel, destined to flitter around on unseen wings in front of those blissful Windows XP hills.
 
 They will regret putting me in here.`,
+
+    "/project/trash/important.txt": `Hey you! yeah you!
+I thought this file would be fun to write so here you are
+Guess it paid off since you're reading it!
+Here i can write whatever i want for you :)
+Real talk though, you need a password.
+I think i can help you with that.
+See this text? The password is hidden all within these lines.
+Enter it to gain access to the 0011 directory! good luck!`,
 
     "/project/1100/entry3PARTA.txt": `The good part about being in a computer is that everything makes sense. 
 Everything is just data. I'M just data. 

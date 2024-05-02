@@ -579,7 +579,7 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "Use the instructions to find and read out the file named ‘log4-15-2024.txt’.",
+                    "Use the instructions to find and read the file ‘log4-15-2024.txt’.",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
@@ -873,6 +873,8 @@ export default class StartScene extends Phaser.Scene {
         // Call CAT's chiming in
         if (Object.values(this.bubbleData)[0] > 25) {
             console.log("COMMAND COUNTER: ", this.commandCount);
+            console.log("RM.TXT: ", CATFS.exists("/home/logs/dir2/rm.txt"));
+            console.log("REDLOCK: ", !CATFS.exists("/redlock.lock"));
             // check for a specific thing from each task
             //TASK 5 HINT
             if (
@@ -887,7 +889,7 @@ export default class StartScene extends Phaser.Scene {
                 // TASK 6 HINT
             } else if (
                 this.commandCount % 13 == 0 &&
-                CATFS.exists("/home/logs/dir2.zip/rm.txt")
+                CATFS.exists("/home/logs/dir2/rm.txt")
             ) {
                 this.bubbleData = {
                     bubbleNum: 4000,
@@ -896,7 +898,7 @@ export default class StartScene extends Phaser.Scene {
                 // TASK 7 HINT
             } else if (
                 this.commandCount % 13 == 0 &&
-                !CATFS.exists("/redlock.exe")
+                !CATFS.exists("/redlock.lock")
             ) {
                 this.bubbleData = {
                     bubbleNum: 6000,
@@ -934,8 +936,10 @@ export default class StartScene extends Phaser.Scene {
                     output += `<span class="terminal-span-zip-color">${name}</span>\n`;
                 }
                 for (const name of dirContents.files) {
-                    if (name == "redlock.exe") {
+                    if (name == "redlock.lock") {
                         output += `<span class="terminal-span-lock-color">${name}/</span>\n`;
+                    } else if (name == "cat.exe") {
+                        output += `<span class="terminal-span-cat-color">${name}</span>\n`;
                     } else {
                         output += `<span class="terminal-span-file-color">${name}</span>\n`;
                     }
