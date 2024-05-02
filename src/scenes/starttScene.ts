@@ -12,6 +12,7 @@ export default class StartScene extends Phaser.Scene {
     bubbleData: object;
     lastOutput: string;
     commandCount: number;
+    hint6: boolean;
     terminalHistory: string[] = [];
     terminalHistoryIndex: number = 0;
     CAT: Phaser.GameObjects.Sprite;
@@ -31,6 +32,7 @@ export default class StartScene extends Phaser.Scene {
         // dummy data to avoid undefined error on first use of cycleDialogue()
         this.bubbleData = { bubbleNum: 0, showBubble: {} };
         this.commandCount = 0;
+        this.hint6 = false;
         // Spawn in the background and CAT image
         this.add.image(400, 300, "desktopBG");
         this.CAT = this.add.sprite(1100, 600, "CAT");
