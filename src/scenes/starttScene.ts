@@ -113,7 +113,7 @@ export default class StartScene extends Phaser.Scene {
 
         //Create Locked Program which cannot be accessed
         this.murderArticle = this.add
-            .image(100, 100, "locked program")
+            .image(100, 100, "unlocked program")
             .setInteractive();
 
         this.murderArticle.on("pointerup", () => {
