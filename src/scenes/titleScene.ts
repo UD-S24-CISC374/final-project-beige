@@ -18,6 +18,7 @@ export default class TitleScene extends Phaser.Scene {
                 objectsClicked: Phaser.GameObjects.Sprite[],
             ) => {
                 console.log(objectsClicked);
+                console.log(pointer);
                 this.scene.stop();
                 // swap to new scene
                 this.scene.start("StartScene");
