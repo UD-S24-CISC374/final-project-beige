@@ -136,11 +136,11 @@ export default class StartScene extends Phaser.Scene {
             .image(300, 100, "r locked program")
             .setInteractive();
         r_locked_prg.on("pointerdown", function () {
-            locked_txt.setTint(0xff6666);
+            r_locked_prg.setTint(0xff6666);
             lockedsfx.play();
         });
         r_locked_prg.on("pointerup", function () {
-            locked_txt.clearTint();
+            r_locked_prg.clearTint();
         });
         //Create Text File which CAN be accessed
         const txt1 = this.add.image(100, 200, "unlocked text").setInteractive();
@@ -1014,6 +1014,9 @@ export default class StartScene extends Phaser.Scene {
                     if(commandParts[1] == "cat.exe"){
                         this.scene.stop();
                         this.scene.start("EndScene");
+                    }
+                    else if(commandParts[1] == "redlock.lock/"){
+                        console.log("REMOVE RED LOCKS HERE")
                     }
                 } else {
                     addOutput(`File "${commandParts[1]} does not exist"`);
