@@ -1011,6 +1011,10 @@ export default class StartScene extends Phaser.Scene {
             case "rm": {
                 if (CATFS.exists(commandParts[1])) {
                     CATFS.deleteFile(commandParts[1]);
+                    if(commandParts[1] == "cat.exe"){
+                        this.scene.stop();
+                        this.scene.start("EndScene");
+                    }
                 } else {
                     addOutput(`File "${commandParts[1]} does not exist"`);
                 }

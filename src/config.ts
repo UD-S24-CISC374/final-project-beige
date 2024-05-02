@@ -4,6 +4,7 @@ import PreloadScene from "./scenes/preloadScene";
 // added scenes
 import StartScene from "./scenes/starttScene";
 import TitleScene from "./scenes/titleScene";
+import EndScene from "./scenes/endScene";
 
 const DEFAULT_WIDTH = 1280;
 const DEFAULT_HEIGHT = 720;
@@ -24,7 +25,7 @@ export const CONFIG = {
     dom: {
         createContainer: true,
     },
-    scene: [PreloadScene, MainScene, StartScene, TitleScene],
+    scene: [PreloadScene, MainScene, StartScene, TitleScene, EndScene],
     physics: {
         default: "arcade",
         arcade: {
