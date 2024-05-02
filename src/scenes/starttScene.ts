@@ -989,6 +989,14 @@ export default class StartScene extends Phaser.Scene {
                 );
                 return;
             }
+            case "rm": {
+                if (CATFS.exists(commandParts[1])) {
+                    CATFS.deleteFile(commandParts[1]);
+                } else {
+                    addOutput(`File "${commandParts[1]} does not exist"`);
+                }
+                return;
+            }
             default: {
                 addOutput(`Unknown command "${commandParts[0]}".`);
                 return;
