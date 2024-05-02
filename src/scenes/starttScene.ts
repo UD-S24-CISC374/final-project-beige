@@ -11,6 +11,7 @@ export default class StartScene extends Phaser.Scene {
     // this will have a number corresponding to the speech bubble 'ID' and an object containing the speech bubble graphics to display
     bubbleData: object;
     lastOutput: string;
+    commandCount: number;
     terminalHistory: string[] = [];
     terminalHistoryIndex: number = 0;
     CAT: Phaser.GameObjects.Sprite;
@@ -29,6 +30,7 @@ export default class StartScene extends Phaser.Scene {
         const thisScene = this;
         // dummy data to avoid undefined error on first use of cycleDialogue()
         this.bubbleData = { bubbleNum: 0, showBubble: {} };
+        this.commandCount = 0;
         // Spawn in the background and CAT image
         this.add.image(400, 300, "desktopBG");
         this.CAT = this.add.sprite(1100, 600, "CAT");
@@ -130,11 +132,7 @@ export default class StartScene extends Phaser.Scene {
         });
         txt1.on("pointerup", () => {
             txt1.clearTint();
-            makeTxtFile(
-                CATFS.readFile(
-                    "/instructions.txt",
-                ),
-            );
+            makeTxtFile(CATFS.readFile("/home/instructions.txt"));
         });
         // SPEECH
         // switch cases are used to determine which speech bubble to display/destory
@@ -175,7 +173,10 @@ export default class StartScene extends Phaser.Scene {
                 terminalInput.value = text;
                 // Set a timeout because the up arrow key wants to move the cursor to the front
                 setTimeout(() => {
-                    terminalInput.setSelectionRange(terminalInput.value.length, terminalInput.value.length);
+                    terminalInput.setSelectionRange(
+                        terminalInput.value.length,
+                        terminalInput.value.length,
+                    );
                 }, 1);
             };
 
@@ -183,7 +184,13 @@ export default class StartScene extends Phaser.Scene {
                 blip.play();
 
                 const text = terminalInput.value.trim();
-                if (this.terminalHistory.length === 0 || (this.terminalHistory.length > 0 && this.terminalHistory[this.terminalHistory.length - 1] !== text)) {
+                if (
+                    this.terminalHistory.length === 0 ||
+                    (this.terminalHistory.length > 0 &&
+                        this.terminalHistory[
+                            this.terminalHistory.length - 1
+                        ] !== text)
+                ) {
                     this.terminalHistory.push(text);
                 }
                 if (this.terminalHistory.length > MAX_TERMINAL_HISTORY) {
@@ -193,9 +200,17 @@ export default class StartScene extends Phaser.Scene {
                 this.parseCommand(terminalInput.value);
                 setInputText("");
             } else if (event.code === "ArrowUp") {
-                if (this.terminalHistory.length - this.terminalHistoryIndex > 0) {
+                if (
+                    this.terminalHistory.length - this.terminalHistoryIndex >
+                    0
+                ) {
                     this.terminalHistoryIndex++;
-                    setInputText(this.terminalHistory[this.terminalHistory.length - this.terminalHistoryIndex]);
+                    setInputText(
+                        this.terminalHistory[
+                            this.terminalHistory.length -
+                                this.terminalHistoryIndex
+                        ],
+                    );
                 }
             } else if (event.code === "ArrowDown") {
                 if (this.terminalHistoryIndex > 0) {
@@ -203,7 +218,12 @@ export default class StartScene extends Phaser.Scene {
                     if (this.terminalHistoryIndex === 0) {
                         setInputText("");
                     } else {
-                        setInputText(this.terminalHistory[this.terminalHistory.length - this.terminalHistoryIndex]);
+                        setInputText(
+                            this.terminalHistory[
+                                this.terminalHistory.length -
+                                    this.terminalHistoryIndex
+                            ],
+                        );
                     }
                 }
             } else {
@@ -692,6 +712,61 @@ export default class StartScene extends Phaser.Scene {
                 // make the text object visible
                 Object.values(showBubble)[1].visible = true;
                 break;
+            // CAT CHIMES IN START
+            case 2000:
+                showBubble = this.createSpeechBubble(
+                    1060,
+                    400,
+                    200,
+                    100,
+                    "Don't you have a file you can go learn to unzip?",
+                );
+                // make the white bubble graphic visible
+                Object.values(showBubble)[0].visible = true;
+                // make the text object visible
+                Object.values(showBubble)[1].visible = true;
+                break;
+            case 4000:
+                showBubble = this.createSpeechBubble(
+                    1060,
+                    400,
+                    200,
+                    100,
+                    "Instead of making the computer shake by hitting your keyboard so hard--",
+                );
+                // make the white bubble graphic visible
+                Object.values(showBubble)[0].visible = true;
+                // make the text object visible
+                Object.values(showBubble)[1].visible = true;
+                break;
+            case 4001:
+                showBubble = this.createSpeechBubble(
+                    1060,
+                    400,
+                    200,
+                    100,
+                    "--you go try to remove some locks instead? Knock yourself out. Please.",
+                );
+                // make the white bubble graphic visible
+                Object.values(showBubble)[0].visible = true;
+                // make the text object visible
+                Object.values(showBubble)[1].visible = true;
+                this.setObjective("Stop annoying CAT.");
+                break;
+            case 6000:
+                showBubble = this.createSpeechBubble(
+                    1060,
+                    400,
+                    200,
+                    100,
+                    "Stop typing and go read something new. Seriously. Jeez.",
+                );
+                // make the white bubble graphic visible
+                Object.values(showBubble)[0].visible = true;
+                // make the text object visible
+                Object.values(showBubble)[1].visible = true;
+                this.setObjective("STOP ANNOYING CAT WHILE THEY WORK.");
+                break;
         }
         bubbleNum = bubbleNum + 1;
         this.bubbleData = { bubbleNum, showBubble };
@@ -775,6 +850,7 @@ export default class StartScene extends Phaser.Scene {
     }
 
     parseCommand(text: string) {
+        this.commandCount = this.commandCount + 1;
         if (text.length === 0) {
             return;
         }
@@ -793,6 +869,45 @@ export default class StartScene extends Phaser.Scene {
             this.lastOutput = output.trim();
         };
         addOutput("");
+
+        // Call CAT's chiming in
+        if (Object.values(this.bubbleData)[0] > 25) {
+            console.log("COMMAND COUNTER: ", this.commandCount);
+            // check for a specific thing from each task
+            //TASK 5 HINT
+            if (
+                this.commandCount % 7 == 0 &&
+                CATFS.exists("/home/logs/dir2.zip")
+            ) {
+                this.bubbleData = {
+                    //2000 is an arbitrary number just to make sure the player doesn't spam click to get to CAT's next Undertale-style switch case
+                    bubbleNum: 2000,
+                    showBubble: {},
+                };
+                // TASK 6 HINT
+            } else if (
+                this.commandCount % 13 == 0 &&
+                CATFS.exists("/home/logs/dir2.zip/rm.txt")
+            ) {
+                this.bubbleData = {
+                    bubbleNum: 4000,
+                    showBubble: {},
+                };
+                // TASK 7 HINT
+            } else if (
+                this.commandCount % 13 == 0 &&
+                !CATFS.exists("/redlock.exe")
+            ) {
+                this.bubbleData = {
+                    bubbleNum: 6000,
+                    showBubble: {},
+                };
+            }
+            this.cycleDialogue(
+                Object.values(this.bubbleData)[0],
+                Object.values(this.bubbleData)[1],
+            );
+        }
 
         const commandParts = text.split(" ");
         while (commandParts.length < 2) {
@@ -819,7 +934,11 @@ export default class StartScene extends Phaser.Scene {
                     output += `<span class="terminal-span-zip-color">${name}</span>\n`;
                 }
                 for (const name of dirContents.files) {
-                    output += `<span class="terminal-span-file-color">${name}</span>\n`;
+                    if (name == "redlock.exe") {
+                        output += `<span class="terminal-span-lock-color">${name}/</span>\n`;
+                    } else {
+                        output += `<span class="terminal-span-file-color">${name}</span>\n`;
+                    }
                 }
                 addOutput(output);
                 return;
@@ -830,9 +949,7 @@ export default class StartScene extends Phaser.Scene {
                         `Could not find the zip file at "${commandParts[1]}".`,
                     );
                 } else {
-                    addOutput(
-                        "Extracted the zip file.",
-                    )
+                    addOutput("Extracted the zip file.");
                 }
                 return;
             }
@@ -849,9 +966,7 @@ export default class StartScene extends Phaser.Scene {
                     );
                     return;
                 }
-                addOutput(
-                    CATFS.readFile(commandParts[1], true),
-                );
+                addOutput(CATFS.readFile(commandParts[1], true));
                 return;
             }
             case "cd": {

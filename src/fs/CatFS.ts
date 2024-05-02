@@ -280,6 +280,8 @@ wizard56: Nah that would never happen, we're too cool.
 lizard58: Soon we'll have justice :)
 wizard56: <:D`,
 
+    "/redlock.exe": ``,
+
     "/project/entry1.txt": `I can't tell what's happened. It's like I have no eyes, yet I can see. 
 I have no hands, but I can type. I have no body, but I can move. Moving doesn't feel right. 
 I can't see my own hands. I have no physical form. The plane is 2D. 
