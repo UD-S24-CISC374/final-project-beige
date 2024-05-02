@@ -3,6 +3,7 @@ import MainScene from "./scenes/mainScene";
 import PreloadScene from "./scenes/preloadScene";
 // added scenes
 import StartScene from "./scenes/starttScene";
+import TitleScene from "./scenes/titleScene";
 
 const DEFAULT_WIDTH = 1280;
 const DEFAULT_HEIGHT = 720;
@@ -19,11 +20,11 @@ export const CONFIG = {
         width: DEFAULT_WIDTH,
         height: DEFAULT_HEIGHT,
     },
-    parent: 'phaser-game',
+    parent: "phaser-game",
     dom: {
-        createContainer: true
+        createContainer: true,
     },
-    scene: [PreloadScene, MainScene, StartScene],
+    scene: [PreloadScene, MainScene, StartScene, TitleScene],
     physics: {
         default: "arcade",
         arcade: {
