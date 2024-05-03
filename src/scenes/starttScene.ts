@@ -20,6 +20,8 @@ export default class StartScene extends Phaser.Scene {
     objectiveText: Phaser.GameObjects.Text;
     // this is the first locked program
     murderArticle: Phaser.GameObjects.Image;
+    hackArticle: Phaser.GameObjects.Image;
+    findMe: Phaser.GameObjects.Image;
     fileDepth: number = 0;
 
     constructor() {
@@ -96,14 +98,25 @@ export default class StartScene extends Phaser.Scene {
                     objectsClicked.length > 0 &&
                     objectsClicked[0].texture.key == "unlocked program"
                 ) {
-                    this.murderArticle.clearTint();
-                    makeProgramFile("article1");
+                    if(objectsClicked[0] == this.murderArticle){
+                        makeProgramFile("article1");
+                    }
+                    else if(objectsClicked[0] == this.hackArticle){
+                        this.hackArticle.clearTint();
+                        makeProgramFile("article2");
+                    }
                 } else if (
                     objectsClicked.length > 0 &&
-                    objectsClicked[0].texture.key == "locked program"
-                ) {
-                    this.murderArticle.setTint(0xff6666);
-                    lockedsfx.play();
+                    objectsClicked[0].texture.key == "unlocked text"
+                ){
+                    if(objectsClicked[0] == this.findMe){
+                        if(CATFS.exists("/project/1100/cat.zip")){
+                            makeTxtFile(CATFS.readFile("/project/1100/cat.zip/cat/find_me.txt"));
+                        }
+                        else{
+                            makeTxtFile(CATFS.readFile("/project/1100/cat/cat/find_me.txt"));
+                        }
+                    }
                 }
             },
         );
@@ -120,27 +133,27 @@ export default class StartScene extends Phaser.Scene {
             this.murderArticle.clearTint();
         });
 
-        //Create Locked Text File which cannot be accessed
-        const locked_txt = this.add
+        //Create Red Locked Text File which cannot be accessed
+        this.findMe = this.add
             .image(200, 100, "r locked text")
             .setInteractive();
-        locked_txt.on("pointerdown", function () {
-            locked_txt.setTint(0xff6666);
+        this.findMe.on("pointerdown", ()=> {
+            this.findMe.setTint(0xff6666);
             lockedsfx.play();
         });
-        locked_txt.on("pointerup", function () {
-            locked_txt.clearTint();
+        this.findMe.on("pointerup", ()=> {
+            this.findMe.clearTint();
         });
         //Create Red Locked Program
-        const r_locked_prg = this.add
+        this.hackArticle = this.add
             .image(300, 100, "r locked program")
             .setInteractive();
-        r_locked_prg.on("pointerdown", function () {
-            r_locked_prg.setTint(0xff6666);
+        this.hackArticle.on("pointerdown", () =>{
+            this.hackArticle.setTint(0xff6666);
             lockedsfx.play();
         });
-        r_locked_prg.on("pointerup", function () {
-            r_locked_prg.clearTint();
+        this.hackArticle.on("pointerup", ()=> {
+            this.hackArticle.clearTint();
         });
         //Create Text File which CAN be accessed
         const txt1 = this.add.image(100, 200, "unlocked text").setInteractive();
@@ -1015,8 +1028,16 @@ export default class StartScene extends Phaser.Scene {
                         this.scene.stop();
                         this.scene.start("EndScene");
                     }
-                    else if(commandParts[1] == "redlock.lock/"){
+                    else if(commandParts[1] == "redlock.lock/" || commandParts[1] == "redlock.lock"){
                         console.log("REMOVE RED LOCKS HERE")
+                        this.hackArticle.destroy();
+                        this.findMe.destroy();
+                        this.hackArticle = this.add
+                            .image(300, 100, "unlocked program")
+                            .setInteractive();
+                        this.findMe = this.add
+                            .image(200, 100, "unlocked text")
+                            .setInteractive();
                     }
                 } else {
                     addOutput(`File "${commandParts[1]} does not exist"`);
