@@ -451,7 +451,7 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "Try making the terminal say “cat”. Go on, you’ve got it.",
+                    "Try making the terminal say “cat”. Then click on me!",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
@@ -495,7 +495,7 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "Okay, so now you can actually have that file show up in the terminal.",
+                    "Okay, so now let's actually have that file show up in the terminal.",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
@@ -510,14 +510,13 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "You’ve got instructions. Go ahead.",
+                    "To see the file name, try the 'ls' command to see what files are there.",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
                 // make the text object visible
                 Object.values(showBubble)[1].visible = true;
                 // add objective text under cat
-                this.setObjective("Make the file appear in the terminal.");
                 break;
             case 14:
                 showBubble = this.createSpeechBubble(
@@ -525,12 +524,13 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "To see the file name, try the 'ls' command to see what files are there.",
+                    "You've got instructions, go ahead.",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
                 // make the text object visible
                 Object.values(showBubble)[1].visible = true;
+                this.setObjective("Make the file appear in the terminal.");
                 break;
             case 15:
                 // check if the player did it right
@@ -570,7 +570,7 @@ export default class StartScene extends Phaser.Scene {
                     400,
                     200,
                     100,
-                    "WHOA! TEXT! That’s actually insane.",
+                    "This terminal's insane isn't it? So much power...",
                 );
                 // make the white bubble graphic visible
                 Object.values(showBubble)[0].visible = true;
@@ -1011,6 +1011,15 @@ export default class StartScene extends Phaser.Scene {
             }
             case "echo": {
                 addOutput(text.substring(4));
+                return;
+            }
+            case "sudo": {
+                if(commandParts[1] == "su"){
+                    addOutput("NOT IMPLEMENTED IN THE BETA, JUST RM CAT.EXE TO WIN");
+                }
+                else{
+                    addOutput(`Unknown command "${commandParts[0]} ${commandParts[1]}".`);
+                }
                 return;
             }
             case "cowsay": {

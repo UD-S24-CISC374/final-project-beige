@@ -292,7 +292,7 @@ I'm at the source... the corruption...`,
     "/project/1100/cat.zip/cat/help.txt": `Good! You found the direcctory!
 In here is the entirety of CAT's code.
 I've tried to delete CAT but I lacked admin permissions to do so...
-I think the command to gain these permissions is "sudo su"
+I think the command to gain these permissions is... "sudo su"
 I cannot try myself as I've already failed and by the time you see this,
 it will be too late for me.
 
