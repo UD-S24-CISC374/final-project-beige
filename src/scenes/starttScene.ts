@@ -86,7 +86,7 @@ export default class StartScene extends Phaser.Scene {
                 // CYCLE DIALOGUE HERE
                 if (
                     objectsClicked.length > 0 &&
-                    objectsClicked[0].texture.key == "CAT"
+                    objectsClicked[0].texture.key === "CAT"
                 ) {
                     this.cycleDialogue(
                         Object.values(this.bubbleData)[0],
@@ -96,20 +96,20 @@ export default class StartScene extends Phaser.Scene {
                     // CHECK FOR UNLOCKED FILES HERE
                 } else if (
                     objectsClicked.length > 0 &&
-                    objectsClicked[0].texture.key == "unlocked program"
+                    objectsClicked[0].texture.key === "unlocked program"
                 ) {
-                    if(objectsClicked[0] == this.murderArticle){
+                    if(objectsClicked[0] === this.murderArticle){
                         makeProgramFile("article1");
                     }
-                    else if(objectsClicked[0] == this.hackArticle){
+                    else if(objectsClicked[0] === this.hackArticle){
                         this.hackArticle.clearTint();
                         makeProgramFile("article2");
                     }
                 } else if (
                     objectsClicked.length > 0 &&
-                    objectsClicked[0].texture.key == "unlocked text"
+                    objectsClicked[0].texture.key === "unlocked text"
                 ){
-                    if(objectsClicked[0] == this.findMe){
+                    if(objectsClicked[0] === this.findMe){
                         if(CATFS.exists("/project/1100/cat.zip")){
                             makeTxtFile(CATFS.readFile("/project/1100/cat.zip/cat/find_me.txt"));
                         }
@@ -908,7 +908,7 @@ export default class StartScene extends Phaser.Scene {
             // check for a specific thing from each task
             //TASK 5 HINT
             if (
-                this.commandCount % 7 == 0 &&
+                this.commandCount % 7 === 0 &&
                 CATFS.exists("/home/logs/dir2.zip")
             ) {
                 this.bubbleData = {
@@ -918,7 +918,7 @@ export default class StartScene extends Phaser.Scene {
                 };
                 // TASK 6 HINT
             } else if (
-                this.commandCount % 13 == 0 &&
+                this.commandCount % 13 === 0 &&
                 CATFS.exists("/home/logs/dir2/rm.txt") &&
                 !this.hint6
             ) {
@@ -929,7 +929,7 @@ export default class StartScene extends Phaser.Scene {
                 this.hint6 = true;
                 // TASK 7 HINT
             } else if (
-                this.commandCount % 13 == 0 &&
+                this.commandCount % 13 === 0 &&
                 !CATFS.exists("/redlock.lock")
             ) {
                 this.bubbleData = {
@@ -950,6 +950,10 @@ export default class StartScene extends Phaser.Scene {
         }
         for (let commandPart of commandParts) {
             commandPart = commandPart.trim();
+            // hack: remove trailing slashes to do string checks properly
+            if (commandPart.endsWith("/")) {
+                commandPart = commandPart.slice(0, commandPart.length - 1);
+            }
         }
 
         switch (commandParts[0]) {
@@ -960,7 +964,6 @@ export default class StartScene extends Phaser.Scene {
             case "ls": {
                 let output = "";
                 const dirContents = CATFS.readCWD();
-                console.log(dirContents);
                 for (const name of dirContents.dirs) {
                     output += `<span class="terminal-span-dir-color">${name}/</span>\n`;
                 }
@@ -968,9 +971,9 @@ export default class StartScene extends Phaser.Scene {
                     output += `<span class="terminal-span-zip-color">${name}</span>\n`;
                 }
                 for (const name of dirContents.files) {
-                    if (name == "redlock.lock") {
-                        output += `<span class="terminal-span-lock-color">${name}/</span>\n`;
-                    } else if (name == "cat.exe") {
+                    if (name === "redlock.lock") {
+                        output += `<span class="terminal-span-lock-color">${name}</span>\n`;
+                    } else if (name === "cat.exe") {
                         output += `<span class="terminal-span-cat-color">${name}</span>\n`;
                     } else {
                         output += `<span class="terminal-span-file-color">${name}</span>\n`;
@@ -1014,10 +1017,9 @@ export default class StartScene extends Phaser.Scene {
                 return;
             }
             case "sudo": {
-                if(commandParts[1] == "su"){
+                if (commandParts[1] === "su") {
                     addOutput("NOT IMPLEMENTED IN THE BETA, JUST RM CAT.EXE TO WIN");
-                }
-                else{
+                } else {
                     addOutput(`Unknown command "${commandParts[0]} ${commandParts[1]}".`);
                 }
                 return;
@@ -1031,14 +1033,13 @@ export default class StartScene extends Phaser.Scene {
                 return;
             }
             case "rm": {
-                if (CATFS.exists(commandParts[1])) {
+                if (CATFS.isFile(commandParts[1])) {
                     CATFS.deleteFile(commandParts[1]);
-                    if(commandParts[1] == "cat.exe"){
+                    if (commandParts[1].endsWith("cat.exe")) {
                         this.scene.stop();
                         this.scene.start("EndScene");
-                    }
-                    else if(commandParts[1] == "redlock.lock/" || commandParts[1] == "redlock.lock"){
-                        console.log("REMOVE RED LOCKS HERE")
+                    } else if (commandParts[1].endsWith("redlock.lock")) {
+                        console.log("REMOVE RED LOCKS HERE");
                         this.hackArticle.destroy();
                         this.findMe.destroy();
                         this.hackArticle = this.add
@@ -1048,8 +1049,10 @@ export default class StartScene extends Phaser.Scene {
                             .image(200, 100, "unlocked text")
                             .setInteractive();
                     }
+                } else if (CATFS.isDir(commandParts[1])) {
+                    addOutput(`Command "rm" cannot remove the directory at "${commandParts[1]}": directory is not empty.`);
                 } else {
-                    addOutput(`File "${commandParts[1]} does not exist"`);
+                    addOutput(`Command "rm" could not find a file called "${commandParts[1]}".`);
                 }
                 return;
             }
