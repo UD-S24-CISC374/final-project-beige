@@ -1016,10 +1016,50 @@ export default class StartScene extends Phaser.Scene {
             }
             case "cd": {
                 if (
-                    CATFS.exists(commandParts[0]) &&
-                    commandParts[1] == "project"
+                    CATFS.exists(commandParts[1]) &&
+                    commandParts[1] === "project" &&
+                    commandParts.length < 3
                 ) {
-                    addOutput("you CANNOT enter that");
+                    addOutput(`
+---WARNING---
+This directory is password protected.
+
+To open it, add "-p PASSWORD" to the end of your command.
+
+Example: cd project -p myPassword
+    would work if your password was "myPassword"
+
+Hint: Name of The Hacker. (All Caps)`);
+                } else if (
+                    CATFS.exists(commandParts[1]) &&
+                    commandParts[1] === "1100" &&
+                    commandParts.length < 3
+                ) {
+                    addOutput(`
+---WARNING---
+This directory is password protected.
+
+Hint: I
+      M
+      P
+      O
+      R
+      T
+      A
+      N
+      T`);
+                } else if (
+                    commandParts[1] === "project" &&
+                    commandParts[2] === "-p" &&
+                    commandParts[3] === "ZERO"
+                ) {
+                    CATFS.cwd = commandParts[1];
+                } else if (
+                    commandParts[1] === "1100" &&
+                    commandParts[2] === "-p" &&
+                    commandParts[3] === "HIGHRISE"
+                ) {
+                    CATFS.cwd = commandParts[1];
                 } else {
                     CATFS.cwd = commandParts[1];
                 }
