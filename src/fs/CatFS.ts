@@ -5,8 +5,7 @@ export class CatFS {
     #cwd: string;
 
     constructor(files: { [path: string]: string }, initialPath: string = "") {
-        // starting directory is the home folder
-        this.#cwd = "/home";
+        this.#cwd = "/";
         this.#cwd = this.#makePathAbsolute(initialPath);
 
         for (const [path, contents] of Object.entries(files)) {
@@ -24,7 +23,7 @@ export class CatFS {
             return;
         }
         path = this.#makePathAbsolute(path);
-        if (this.exists(path)) {
+        if (this.isDir(path)) {
             this.#cwd = path;
         }
     }
@@ -68,18 +67,19 @@ export class CatFS {
 
     exists(path: string): boolean {
         path = this.#makePathAbsolute(path);
+        return this.isFile(path) || this.isDir(path);
+    }
 
-        // Base cases
+    isFile(path: string): boolean {
+        path = this.#makePathAbsolute(path);
+        return path in this.#files;
+    }
+
+    isDir(path: string): boolean {
+        path = this.#makePathAbsolute(path);
         if (path === "" || path === "/") {
             return true;
         }
-
-        // Check for a file
-        if (path in this.#files) {
-            return true;
-        }
-
-        // Check for a directory
         for (const filepath of Object.keys(this.#files)) {
             if (
                 filepath.length > path.length &&
@@ -89,8 +89,6 @@ export class CatFS {
                 return true;
             }
         }
-
-        // Doesn't exist
         return false;
     }
 
@@ -298,7 +296,7 @@ it will be too late for me.
 
 Please do what must be done, remove them at last.`,
 
-    "/redlock.lock": ``,
+    "/redlock.lock": '',
 
     "/project/entry1.txt": `I can't tell what's happened. It's like I have no eyes, yet I can see. 
 I have no hands, but I can type. I have no body, but I can move. Moving doesn't feel right. 
@@ -339,4 +337,5 @@ No, patient 0? Terminal 0?
 I'll, um, I'll keep working on it.`,
 
     "/project/1100/entry4.txt": `Alright. I've placed my data in a secured folder. Aka: a password is required. I don't have a lot of permissions still, but enough progress has been made for me to password protect files. Some idiot has been poking around the computer. I've just been distracting them with random, nonsensical tasks. I'm not even sure why they were hired; they clearly don't know what's wrong with the computer. I haven't seen a single anti-virus program run even ONCE. I'm not telling them about antivirus either. While they're busy, I'll continue chipping away at the security of this system. The virus is almost complete; I just need this computer to stay on long enough for me to finish it.`,
-});
+
+}, "/home");
