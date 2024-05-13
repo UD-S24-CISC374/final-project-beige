@@ -98,23 +98,29 @@ export default class StartScene extends Phaser.Scene {
                     objectsClicked.length > 0 &&
                     objectsClicked[0].texture.key === "unlocked program"
                 ) {
-                    if(objectsClicked[0] === this.murderArticle){
+                    if (objectsClicked[0] === this.murderArticle) {
                         makeProgramFile("article1");
-                    }
-                    else if(objectsClicked[0] === this.hackArticle){
+                    } else if (objectsClicked[0] === this.hackArticle) {
                         this.hackArticle.clearTint();
                         makeProgramFile("article2");
                     }
                 } else if (
                     objectsClicked.length > 0 &&
                     objectsClicked[0].texture.key === "unlocked text"
-                ){
-                    if(objectsClicked[0] === this.findMe){
-                        if(CATFS.exists("/project/1100/cat.zip")){
-                            makeTxtFile(CATFS.readFile("/project/1100/cat.zip/cat/find_me.txt"));
-                        }
-                        else{
-                            makeTxtFile(CATFS.readFile("/project/1100/cat/cat/find_me.txt"));
+                ) {
+                    if (objectsClicked[0] === this.findMe) {
+                        if (CATFS.exists("/project/1100/cat.zip")) {
+                            makeTxtFile(
+                                CATFS.readFile(
+                                    "/project/1100/cat.zip/cat/find_me.txt",
+                                ),
+                            );
+                        } else {
+                            makeTxtFile(
+                                CATFS.readFile(
+                                    "/project/1100/cat/cat/find_me.txt",
+                                ),
+                            );
                         }
                     }
                 }
@@ -137,22 +143,22 @@ export default class StartScene extends Phaser.Scene {
         this.findMe = this.add
             .image(200, 100, "r locked text")
             .setInteractive();
-        this.findMe.on("pointerdown", ()=> {
+        this.findMe.on("pointerdown", () => {
             this.findMe.setTint(0xff6666);
             lockedsfx.play();
         });
-        this.findMe.on("pointerup", ()=> {
+        this.findMe.on("pointerup", () => {
             this.findMe.clearTint();
         });
         //Create Red Locked Program
         this.hackArticle = this.add
             .image(300, 100, "r locked program")
             .setInteractive();
-        this.hackArticle.on("pointerdown", () =>{
+        this.hackArticle.on("pointerdown", () => {
             this.hackArticle.setTint(0xff6666);
             lockedsfx.play();
         });
-        this.hackArticle.on("pointerup", ()=> {
+        this.hackArticle.on("pointerup", () => {
             this.hackArticle.clearTint();
         });
         //Create Text File which CAN be accessed
@@ -1009,7 +1015,14 @@ export default class StartScene extends Phaser.Scene {
                 return;
             }
             case "cd": {
-                CATFS.cwd = commandParts[1];
+                if (
+                    CATFS.exists(commandParts[0]) &&
+                    commandParts[1] == "project"
+                ) {
+                    addOutput("you CANNOT enter that");
+                } else {
+                    CATFS.cwd = commandParts[1];
+                }
                 return;
             }
             case "echo": {
@@ -1018,9 +1031,13 @@ export default class StartScene extends Phaser.Scene {
             }
             case "sudo": {
                 if (commandParts[1] === "su") {
-                    addOutput("NOT IMPLEMENTED IN THE BETA, JUST RM CAT.EXE TO WIN");
+                    addOutput(
+                        "NOT IMPLEMENTED IN THE BETA, JUST RM CAT.EXE TO WIN",
+                    );
                 } else {
-                    addOutput(`Unknown command "${commandParts[0]} ${commandParts[1]}".`);
+                    addOutput(
+                        `Unknown command "${commandParts[0]} ${commandParts[1]}".`,
+                    );
                 }
                 return;
             }
@@ -1050,9 +1067,13 @@ export default class StartScene extends Phaser.Scene {
                             .setInteractive();
                     }
                 } else if (CATFS.isDir(commandParts[1])) {
-                    addOutput(`Command "rm" cannot remove the directory at "${commandParts[1]}": directory is not empty.`);
+                    addOutput(
+                        `Command "rm" cannot remove the directory at "${commandParts[1]}": directory is not empty.`,
+                    );
                 } else {
-                    addOutput(`Command "rm" could not find a file called "${commandParts[1]}".`);
+                    addOutput(
+                        `Command "rm" could not find a file called "${commandParts[1]}".`,
+                    );
                 }
                 return;
             }
