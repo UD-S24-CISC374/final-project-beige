@@ -1010,6 +1010,10 @@ export default class StartScene extends Phaser.Scene {
                 return;
             }
             case "cd": {
+                if (!CATFS.isDir(commandParts[1])) {
+                    addOutput(`Command "cd" could not find a directory called "${commandParts[1]}".`);
+                    return;
+                }
                 CATFS.cwd = commandParts[1];
                 return;
             }
