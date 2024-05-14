@@ -69,6 +69,7 @@
             }
             .jetbrains-mono-normal {
                 font-family: "JetBrains Mono", monospace;
+                font-size: 1.2em;
                 font-optical-sizing: auto;
                 font-weight: 400;
                 font-style: normal;
@@ -87,6 +88,37 @@
             }
             .terminal-span-file-color {
                 color: #5fbb5f;
+            }
+            .terminal-span-input-color {
+                color: #ccc;
+            }
+            #terminal-history-parent {
+                display: inline;
+                overflow-y: scroll;
+                white-space: pre-wrap;
+                margin: 0;
+                padding: 0;
+                background-color: #0000;
+                color: #fff;
+            }
+            #terminal-history-parent > p {
+                margin: 8px 0;
+                padding: 0;
+            }
+            #terminal-history-parent > p:last-child {
+                padding-bottom: 8px;
+            }
+            #terminal-current-directory {
+                margin: 0;
+                padding: 0;
+            }
+            #terminal-input {
+                outline: none;
+                border: none;
+                margin: 0;
+                padding: 0;
+                background-color: #0000;
+                color: #fff;
             }
         </style>
 

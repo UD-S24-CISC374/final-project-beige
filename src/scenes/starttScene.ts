@@ -1,11 +1,11 @@
 import * as cowsay from "cowsay";
 import Phaser from "phaser";
-import { CATFS } from "../fs/CatFS";
+import { escapeHTML, CATFS } from "../fs/CatFS";
 import TextFile from "../objects/textFile";
 import ProgramFile from "../objects/programFile";
 // CODE FOR createSpeechBubbles() HEAVILY REFERENCED FROM HERE: https://github.com/phaserjs/examples/blob/master/public/src/game%20objects/text/speech%20bubble.js
 
-const MAX_TERMINAL_HISTORY = 512;
+const MAX_TERMINAL_INPUT_HISTORY = 512;
 
 export default class StartScene extends Phaser.Scene {
     // this will have a number corresponding to the speech bubble 'ID' and an object containing the speech bubble graphics to display
@@ -176,27 +176,13 @@ export default class StartScene extends Phaser.Scene {
         const terminalWidth = 1280 / 2;
         const terminalHeight = 400;
         const terminalInputHeight = 32;
-        const terminalFontSize = "1.2em";
         // -- Input
         const terminalInput = document.createElement("input");
+        terminalInput.id = "terminal-input";
+        terminalInput.className = "jetbrains-mono-normal";
         terminalInput.type = "text";
-        terminalInput.style.outline = "none";
-        terminalInput.style.border = "none";
         terminalInput.style.width = `${terminalWidth - 8}px`;
         terminalInput.style.height = `${terminalInputHeight}px`;
-        terminalInput.style.padding = "0px";
-        terminalInput.style.margin = "0px";
-        terminalInput.style.backgroundColor = "#0000";
-        terminalInput.style.color = "#fff";
-        terminalInput.className = "jetbrains-mono-normal";
-        terminalInput.style.backgroundImage =
-            'url("assets/img/terminal prompt.png")';
-        terminalInput.style.backgroundPosition = "8px 8px";
-        terminalInput.style.backgroundRepeat = "no-repeat";
-        terminalInput.style.backgroundSize = "16px";
-        terminalInput.style.paddingLeft = "28px";
-        terminalInput.style.fontSize = terminalFontSize;
-        this.game.canvas.parentNode?.appendChild(terminalInput);
         terminalInput.addEventListener("keydown", (event) => {
             const setInputText = (text: string) => {
                 terminalInput.focus();
@@ -213,7 +199,7 @@ export default class StartScene extends Phaser.Scene {
             if (event.code === "Enter") {
                 blip.play();
 
-                const text = terminalInput.value.trim();
+                const text = escapeHTML(terminalInput.value.trim());
                 if (
                     this.terminalHistory.length === 0 ||
                     (this.terminalHistory.length > 0 &&
@@ -223,16 +209,16 @@ export default class StartScene extends Phaser.Scene {
                 ) {
                     this.terminalHistory.push(text);
                 }
-                if (this.terminalHistory.length > MAX_TERMINAL_HISTORY) {
+                if (this.terminalHistory.length > MAX_TERMINAL_INPUT_HISTORY) {
                     this.terminalHistory.splice(0, 1);
                 }
+                this.terminalHistoryIndex = 0;
 
-                this.parseCommand(terminalInput.value);
+                this.parseCommand(text);
                 setInputText("");
             } else if (event.code === "ArrowUp") {
                 if (
-                    this.terminalHistory.length - this.terminalHistoryIndex >
-                    0
+                    this.terminalHistory.length - this.terminalHistoryIndex > 0
                 ) {
                     this.terminalHistoryIndex++;
                     setInputText(
@@ -260,38 +246,53 @@ export default class StartScene extends Phaser.Scene {
                 this.terminalHistoryIndex = 0;
             }
         });
-        // -- Text
+        // -- History
         const terminalHistoryParent = document.createElement("div");
-        terminalHistoryParent.style.width = `${terminalWidth - 8}px`;
-        terminalHistoryParent.style.height = `${terminalHeight - terminalInputHeight}px`;
-        terminalHistoryParent.style.padding = "0px";
-        terminalHistoryParent.style.margin = "0px";
-        terminalHistoryParent.style.backgroundColor = "#0000";
-        terminalHistoryParent.style.color = "#fff";
+        terminalHistoryParent.id = "terminal-history-parent";
         terminalHistoryParent.className = "jetbrains-mono-normal";
-        terminalHistoryParent.style.fontSize = terminalFontSize;
-        terminalHistoryParent.style.display = "inline";
-        terminalHistoryParent.innerHTML =
-            '<p id="terminal-history" style="white-space: pre-wrap"></p>';
+        terminalHistoryParent.style.width = `${terminalWidth - 8}px`;
+        terminalHistoryParent.style.height = `${terminalHeight - terminalInputHeight / 2 - 16}px`;
+        // -- Current Directory
+        const terminalCurrentDirectory = document.createElement("p");
+        terminalCurrentDirectory.id = "terminal-current-directory";
+        terminalCurrentDirectory.className = "jetbrains-mono-normal terminal-span-dir-color";
         // -- Background
         this.add.rectangle(
-            terminalWidth / 2 + 12,
+            terminalWidth / 2 + 2,
             720 - terminalHeight / 2,
-            terminalWidth + 24,
+            terminalWidth + 4,
             terminalHeight,
             0x000000,
             0x40,
         );
         this.add.dom(
-            terminalWidth / 2 + 22,
-            720 - terminalHeight / 2,
+            terminalWidth / 2 + 4,
+            720 - terminalHeight / 2 - terminalInputHeight / 2,
             terminalHistoryParent,
         );
-        this.add.dom(
-            terminalWidth / 2 + 8,
-            720 - terminalInputHeight / 2,
+        const terminalCWDElement = this.add.dom(
+            0,
+            0,
+            terminalCurrentDirectory,
+        );
+        const terminalInputElement = this.add.dom(
+            0,
+            0,
             terminalInput,
         );
+        // -- Current Directory
+        CATFS.registerCWDChangeCallback((newCWD) => {
+            terminalCurrentDirectory.innerText = (newCWD != "/" ? newCWD : "") + "/\u200b>";
+            terminalCWDElement.setPosition(
+                0,
+                720 - terminalInputHeight / 2 - 16,
+            );
+            terminalInputElement.setPosition(
+                terminalWidth / 2 + 4 + terminalCurrentDirectory.offsetWidth,
+                720 - terminalInputHeight / 2 - 2,
+            );
+            terminalInput.style.width = `${terminalWidth - 8 - terminalCurrentDirectory.offsetWidth}px`;
+        });
     }
 
     get lastCommand(): string {
@@ -885,20 +886,20 @@ export default class StartScene extends Phaser.Scene {
             return;
         }
 
-        const terminalHistory = document.getElementById("terminal-history");
+        const terminalHistory = document.getElementById("terminal-history-parent");
         if (!terminalHistory) {
             return;
         }
 
-        text = text.trim();
-
-        // todo: need to improve output
-        const addOutput = (output: string) => {
-            terminalHistory.innerHTML = output.trim();
+        const addOutput = (output: string, trimOutput: boolean = true) => {
+            terminalHistory.innerHTML += `<p>${trimOutput ? output.trim() : output}</p>`;
+            terminalHistory.scrollTo(0, terminalHistory.scrollHeight);
             // CAT checks this for some commands
             this.lastOutput = output.trim();
         };
-        addOutput("");
+
+        text = text.trim();
+        addOutput(`<span class="terminal-span-input-color">&gt; ${text}</span>`);
 
         // Call CAT's chiming in
         if (Object.values(this.bubbleData)[0] > 25) {
@@ -958,7 +959,7 @@ export default class StartScene extends Phaser.Scene {
 
         switch (commandParts[0]) {
             case "clear": {
-                addOutput("");
+                terminalHistory.innerHTML = "";
                 return;
             }
             case "ls": {
@@ -1009,6 +1010,10 @@ export default class StartScene extends Phaser.Scene {
                 return;
             }
             case "cd": {
+                if (!CATFS.isDir(commandParts[1])) {
+                    addOutput(`Command "cd" could not find a directory called "${commandParts[1]}".`);
+                    return;
+                }
                 CATFS.cwd = commandParts[1];
                 return;
             }
@@ -1029,6 +1034,7 @@ export default class StartScene extends Phaser.Scene {
                     cowsay.say({
                         text: text.substring(6).trim(),
                     }),
+                    false,
                 );
                 return;
             }
