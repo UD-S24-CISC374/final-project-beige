@@ -199,7 +199,7 @@ export default class StartScene extends Phaser.Scene {
             if (event.code === "Enter") {
                 blip.play();
 
-                const text = escapeHTML(terminalInput.value.trim());
+                const text = escapeHTML(terminalInput.value.trim()).replaceAll('"', "");
                 if (
                     this.terminalHistory.length === 0 ||
                     (this.terminalHistory.length > 0 &&
