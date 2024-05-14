@@ -1,5 +1,12 @@
 type CatFSDirContents = { files: string[]; dirs: string[]; zips: string[] };
 
+export function escapeHTML(contents: string): string {
+    return contents
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+}
+
 export class CatFS {
     #files: { [path: string]: string } = {};
     #cwd: string;
@@ -99,10 +106,7 @@ export class CatFS {
             if (!cleanHTML) {
                 return contents;
             }
-            return contents
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;");
+            return escapeHTML(contents);
         }
         return "";
     }

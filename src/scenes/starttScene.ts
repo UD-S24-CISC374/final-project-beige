@@ -1,6 +1,6 @@
 import * as cowsay from "cowsay";
 import Phaser from "phaser";
-import { CATFS } from "../fs/CatFS";
+import { escapeHTML, CATFS } from "../fs/CatFS";
 import TextFile from "../objects/textFile";
 import ProgramFile from "../objects/programFile";
 // CODE FOR createSpeechBubbles() HEAVILY REFERENCED FROM HERE: https://github.com/phaserjs/examples/blob/master/public/src/game%20objects/text/speech%20bubble.js
@@ -199,7 +199,7 @@ export default class StartScene extends Phaser.Scene {
             if (event.code === "Enter") {
                 blip.play();
 
-                const text = terminalInput.value.trim();
+                const text = escapeHTML(terminalInput.value.trim());
                 if (
                     this.terminalHistory.length === 0 ||
                     (this.terminalHistory.length > 0 &&
@@ -212,8 +212,9 @@ export default class StartScene extends Phaser.Scene {
                 if (this.terminalHistory.length > MAX_TERMINAL_INPUT_HISTORY) {
                     this.terminalHistory.splice(0, 1);
                 }
+                this.terminalHistoryIndex = 0;
 
-                this.parseCommand(terminalInput.value);
+                this.parseCommand(text);
                 setInputText("");
             } else if (event.code === "ArrowUp") {
                 if (
