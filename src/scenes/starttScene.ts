@@ -13,6 +13,7 @@ export default class StartScene extends Phaser.Scene {
     lastOutput: string;
     commandCount: number;
     hint6: boolean;
+    puterFlag: boolean = false;
     terminalHistory: string[] = [];
     terminalHistoryIndex: number = 0;
     CAT: Phaser.GameObjects.Sprite;
@@ -824,7 +825,10 @@ export default class StartScene extends Phaser.Scene {
         height: number,
         quote: string,
     ) {
-        this.CAT.play("talk");
+        if (!this.puterFlag) {
+            this.CAT.play("talk");
+        }
+
         const bubbleWidth = width;
         const bubbleHeight = height;
         const bubblePadding = 10;
@@ -1055,8 +1059,9 @@ export default class StartScene extends Phaser.Scene {
                 if (CATFS.isFile(commandParts[1])) {
                     CATFS.deleteFile(commandParts[1]);
                     if (commandParts[1].endsWith("cat.exe")) {
-                        this.scene.stop();
-                        this.scene.start("EndScene");
+                        this.CAT.setTexture("deadCAT");
+                        //this.scene.stop();
+                        //this.scene.start("EndScene");
                     } else if (commandParts[1].endsWith("redlock.lock")) {
                         console.log("REMOVE RED LOCKS HERE");
                         this.hackArticle.destroy();
