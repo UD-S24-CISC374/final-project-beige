@@ -32,7 +32,7 @@ CAT will guide you through most things, but here are some other instructions:
 
 # Gameplay Video
 
-<iframe src="https://drive.google.com/file/d/1sTK4Yf55PwjRNaVS4bOryQoKGtSQ_wAp/preview" width="640" height="480" allow="autoplay"></iframe>
+![Video](https://drive.google.com/file/d/1sTK4Yf55PwjRNaVS4bOryQoKGtSQ_wAp/view?usp=sharing)
 
 # Educational Game Design Document
 
