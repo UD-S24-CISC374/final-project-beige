@@ -34,6 +34,8 @@ CAT will guide you through most things, but here are some other instructions:
 
 [![Gameplay Video](https://img.youtube.com/vi/vYD6jjKvhuI/0.jpg)](https://www.youtube.com/watch?v=vYD6jjKvhuI)
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/vYD6jjKvhuI?si=80ep3SQWamTWnN5L" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 # Educational Game Design Document
 
 Link to our [egdd](docs/egdd.md)
