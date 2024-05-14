@@ -7,9 +7,12 @@ export function escapeHTML(contents: string): string {
         .replaceAll(">", "&gt;");
 }
 
+type CatFSCWDChangeCallback = (newCWD: string) => void;
+
 export class CatFS {
     #files: { [path: string]: string } = {};
     #cwd: string;
+    #cwdChangeCallbacks: CatFSCWDChangeCallback[] = [];
 
     constructor(files: { [path: string]: string }, initialPath: string = "") {
         this.#cwd = "/";
@@ -33,6 +36,16 @@ export class CatFS {
         if (this.isDir(path)) {
             this.#cwd = path;
         }
+        for (const callback of this.#cwdChangeCallbacks) {
+            callback(this.#cwd);
+        }
+    }
+
+    registerCWDChangeCallback(callback: CatFSCWDChangeCallback): void {
+        callback(this.cwd);
+        // HACK: need to run this twice to properly set HTML values
+        setTimeout(() => { callback(this.cwd); }, 100);
+        this.#cwdChangeCallbacks.push(callback);
     }
 
     #makePathAbsolute(path: string): string {

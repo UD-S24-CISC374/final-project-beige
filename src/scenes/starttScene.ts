@@ -251,26 +251,48 @@ export default class StartScene extends Phaser.Scene {
         terminalHistoryParent.id = "terminal-history-parent";
         terminalHistoryParent.className = "jetbrains-mono-normal";
         terminalHistoryParent.style.width = `${terminalWidth - 8}px`;
-        terminalHistoryParent.style.height = `${terminalHeight - terminalInputHeight / 2 - 8}px`;
+        terminalHistoryParent.style.height = `${terminalHeight - terminalInputHeight / 2 - 16}px`;
+        // -- Current Directory
+        const terminalCurrentDirectory = document.createElement("p");
+        terminalCurrentDirectory.id = "terminal-current-directory";
+        terminalCurrentDirectory.className = "jetbrains-mono-normal terminal-span-dir-color";
         // -- Background
         this.add.rectangle(
-            terminalWidth / 2 + 12,
+            terminalWidth / 2 + 2,
             720 - terminalHeight / 2,
-            terminalWidth + 24,
+            terminalWidth + 4,
             terminalHeight,
             0x000000,
             0x40,
         );
         this.add.dom(
-            terminalWidth / 2 + 22,
-            720 - terminalHeight / 2 - terminalInputHeight / 2 + 4,
+            terminalWidth / 2 + 4,
+            720 - terminalHeight / 2 - terminalInputHeight / 2,
             terminalHistoryParent,
         );
-        this.add.dom(
-            terminalWidth / 2 + 8,
-            720 - terminalInputHeight / 2,
+        const terminalCWDElement = this.add.dom(
+            0,
+            0,
+            terminalCurrentDirectory,
+        );
+        const terminalInputElement = this.add.dom(
+            0,
+            0,
             terminalInput,
         );
+        // -- Current Directory
+        CATFS.registerCWDChangeCallback((newCWD) => {
+            terminalCurrentDirectory.innerText = (newCWD != "/" ? newCWD : "") + "/\u200b>";
+            terminalCWDElement.setPosition(
+                0,
+                720 - terminalInputHeight / 2 - 16,
+            );
+            terminalInputElement.setPosition(
+                terminalWidth / 2 + 4 + terminalCurrentDirectory.offsetWidth,
+                720 - terminalInputHeight / 2 - 2,
+            );
+            terminalInput.style.width = `${terminalWidth - 8 - terminalCurrentDirectory.offsetWidth}px`;
+        });
     }
 
     get lastCommand(): string {
