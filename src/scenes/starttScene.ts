@@ -66,7 +66,7 @@ export default class StartScene extends Phaser.Scene {
             new TextFile(
                 thisScene,
                 text,
-                Math.floor(Math.random() * (1000 - 600 + 1)) + 600,
+                Math.floor(Math.random() * (1000 - 680 + 1)) + 680,
                 Math.floor(Math.random() * (500 - 20 + 1)) + 20,
             );
         }
@@ -74,7 +74,7 @@ export default class StartScene extends Phaser.Scene {
             new ProgramFile(
                 thisScene,
                 text,
-                Math.floor(Math.random() * (1100 - 600 + 1)) + 600,
+                Math.floor(Math.random() * (1100 - 850 + 1)) + 850,
                 Math.floor(Math.random() * (520 - 220 + 1)) + 220,
             );
         }
