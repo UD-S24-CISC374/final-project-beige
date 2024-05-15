@@ -13,6 +13,7 @@ export default class StartScene extends Phaser.Scene {
     lastOutput: string;
     commandCount: number;
     hint6: boolean;
+    puterFlag: number = 0;
     terminalHistory: string[] = [];
     terminalHistoryIndex: number = 0;
     CAT: Phaser.GameObjects.Sprite;
@@ -47,6 +48,14 @@ export default class StartScene extends Phaser.Scene {
         backgroundLoop.setLoop(true);
         backgroundLoop.setVolume(0.3);
         backgroundLoop.play();
+
+        // for playing CAT's talk animation
+        this.anims.create({
+            key: "talk",
+            frames: [{ key: "talkCAT" }, { key: "CAT" }],
+            frameRate: 10,
+            repeat: 3,
+        });
 
         // Make CAT clickable
         this.CAT.setInteractive();
@@ -85,8 +94,9 @@ export default class StartScene extends Phaser.Scene {
                 }
                 // CYCLE DIALOGUE HERE
                 if (
-                    objectsClicked.length > 0 &&
-                    objectsClicked[0].texture.key === "CAT"
+                    (objectsClicked.length > 0 &&
+                        objectsClicked[0].texture.key === "CAT") ||
+                    objectsClicked[0].texture.key === "CATputer"
                 ) {
                     this.cycleDialogue(
                         Object.values(this.bubbleData)[0],
@@ -98,23 +108,29 @@ export default class StartScene extends Phaser.Scene {
                     objectsClicked.length > 0 &&
                     objectsClicked[0].texture.key === "unlocked program"
                 ) {
-                    if(objectsClicked[0] === this.murderArticle){
+                    if (objectsClicked[0] === this.murderArticle) {
                         makeProgramFile("article1");
-                    }
-                    else if(objectsClicked[0] === this.hackArticle){
+                    } else if (objectsClicked[0] === this.hackArticle) {
                         this.hackArticle.clearTint();
                         makeProgramFile("article2");
                     }
                 } else if (
                     objectsClicked.length > 0 &&
                     objectsClicked[0].texture.key === "unlocked text"
-                ){
-                    if(objectsClicked[0] === this.findMe){
-                        if(CATFS.exists("/project/1100/cat.zip")){
-                            makeTxtFile(CATFS.readFile("/project/1100/cat.zip/cat/find_me.txt"));
-                        }
-                        else{
-                            makeTxtFile(CATFS.readFile("/project/1100/cat/cat/find_me.txt"));
+                ) {
+                    if (objectsClicked[0] === this.findMe) {
+                        if (CATFS.exists("/project/1100/cat.zip")) {
+                            makeTxtFile(
+                                CATFS.readFile(
+                                    "/project/1100/cat.zip/cat/find_me.txt",
+                                ),
+                            );
+                        } else {
+                            makeTxtFile(
+                                CATFS.readFile(
+                                    "/project/1100/cat/cat/find_me.txt",
+                                ),
+                            );
                         }
                     }
                 }
@@ -137,22 +153,22 @@ export default class StartScene extends Phaser.Scene {
         this.findMe = this.add
             .image(200, 100, "r locked text")
             .setInteractive();
-        this.findMe.on("pointerdown", ()=> {
+        this.findMe.on("pointerdown", () => {
             this.findMe.setTint(0xff6666);
             lockedsfx.play();
         });
-        this.findMe.on("pointerup", ()=> {
+        this.findMe.on("pointerup", () => {
             this.findMe.clearTint();
         });
         //Create Red Locked Program
         this.hackArticle = this.add
             .image(300, 100, "r locked program")
             .setInteractive();
-        this.hackArticle.on("pointerdown", () =>{
+        this.hackArticle.on("pointerdown", () => {
             this.hackArticle.setTint(0xff6666);
             lockedsfx.play();
         });
-        this.hackArticle.on("pointerup", ()=> {
+        this.hackArticle.on("pointerup", () => {
             this.hackArticle.clearTint();
         });
         //Create Text File which CAN be accessed
@@ -732,6 +748,7 @@ export default class StartScene extends Phaser.Scene {
                 Object.values(showBubble)[1].visible = true;
                 // add objective text under cat
                 this.setObjective("Use what you learned in baller.txt");
+                this.puterFlag = 1;
                 break;
             case 25:
                 showBubble = this.createSpeechBubble(
@@ -814,6 +831,14 @@ export default class StartScene extends Phaser.Scene {
         height: number,
         quote: string,
     ) {
+        if (this.puterFlag == 0) {
+            this.CAT.play("talk");
+        } else if (this.puterFlag == 1) {
+            this.CAT.setTexture("CATputer");
+        } else {
+            this.CAT.setTexture("deadCAT");
+        }
+
         const bubbleWidth = width;
         const bubbleHeight = height;
         const bubblePadding = 10;
@@ -1026,9 +1051,13 @@ export default class StartScene extends Phaser.Scene {
             }
             case "sudo": {
                 if (commandParts[1] === "su") {
-                    addOutput("NOT IMPLEMENTED IN THE BETA, JUST RM CAT.EXE TO WIN");
+                    addOutput(
+                        "NOT IMPLEMENTED IN THE BETA, JUST RM CAT.EXE TO WIN",
+                    );
                 } else {
-                    addOutput(`Unknown command "${commandParts[0]} ${commandParts[1]}".`);
+                    addOutput(
+                        `Unknown command "${commandParts[0]} ${commandParts[1]}".`,
+                    );
                 }
                 return;
             }
@@ -1045,8 +1074,10 @@ export default class StartScene extends Phaser.Scene {
                 if (CATFS.isFile(commandParts[1])) {
                     CATFS.deleteFile(commandParts[1]);
                     if (commandParts[1].endsWith("cat.exe")) {
-                        this.scene.stop();
-                        this.scene.start("EndScene");
+                        this.CAT.setTexture("deadCAT");
+                        this.puterFlag = 2;
+                        //this.scene.stop();
+                        //this.scene.start("EndScene");
                     } else if (commandParts[1].endsWith("redlock.lock")) {
                         console.log("REMOVE RED LOCKS HERE");
                         this.hackArticle.destroy();
@@ -1059,9 +1090,13 @@ export default class StartScene extends Phaser.Scene {
                             .setInteractive();
                     }
                 } else if (CATFS.isDir(commandParts[1])) {
-                    addOutput(`Command "rm" cannot remove the directory at "${commandParts[1]}": directory is not empty.`);
+                    addOutput(
+                        `Command "rm" cannot remove the directory at "${commandParts[1]}": directory is not empty.`,
+                    );
                 } else {
-                    addOutput(`Command "rm" could not find a file called "${commandParts[1]}".`);
+                    addOutput(
+                        `Command "rm" could not find a file called "${commandParts[1]}".`,
+                    );
                 }
                 return;
             }
