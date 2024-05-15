@@ -199,7 +199,7 @@ export default class StartScene extends Phaser.Scene {
             if (event.code === "Enter") {
                 blip.play();
 
-                const text = escapeHTML(terminalInput.value.trim());
+                const text = escapeHTML(terminalInput.value.trim()).replaceAll('"', "");
                 if (
                     this.terminalHistory.length === 0 ||
                     (this.terminalHistory.length > 0 &&
@@ -252,6 +252,9 @@ export default class StartScene extends Phaser.Scene {
         terminalHistoryParent.className = "jetbrains-mono-normal";
         terminalHistoryParent.style.width = `${terminalWidth - 8}px`;
         terminalHistoryParent.style.height = `${terminalHeight - terminalInputHeight / 2 - 16}px`;
+        terminalHistoryParent.addEventListener("mouseenter", () => {
+            terminalInput.focus();
+        });
         // -- Current Directory
         const terminalCurrentDirectory = document.createElement("p");
         terminalCurrentDirectory.id = "terminal-current-directory";
