@@ -997,7 +997,14 @@ export default class StartScene extends Phaser.Scene {
                 let output = "";
                 const dirContents = CATFS.readCWD();
                 for (const name of dirContents.dirs) {
-                    output += `<span class="terminal-span-dir-color">${name}/</span>\n`;
+                    if (
+                        (name === "project" && this.passFlag < 1) ||
+                        (name === "1100" && this.passFlag < 2)
+                    ) {
+                        output += `<span class="terminal-span-pswd-color">${name}/</span>\n`;
+                    } else {
+                        output += `<span class="terminal-span-dir-color">${name}/</span>\n`;
+                    }
                 }
                 for (const name of dirContents.zips) {
                     output += `<span class="terminal-span-zip-color">${name}</span>\n`;
