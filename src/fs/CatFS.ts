@@ -277,7 +277,7 @@ You ever encounter a directory that ends in .zip? With no way to open it?
 Well girl do I have a command for you!
 INTRODUCING "unzip DIRECTORY.zip" This will unzip that directory so you can get to explorin it!`,
 
-        "/home/logs/dir2.zip/rm.txt": `blonk291: Duuuuuuuuuuuuuuuude I accidentally made a virus.
+        "/home/logs/secret.zip/rm.txt": `blonk291: Duuuuuuuuuuuuuuuude I accidentally made a virus.
 lizard58: HOW DO YOU JUST *MAKE* A VIRUS???
 blonk291: Idk dude but I need to remove it STAT.
 lizard58: Ohhhhhhhhh boy ok. Use the rm command.
@@ -288,7 +288,7 @@ lizard58: IF YOU ACTUALLY NAMED YOUR VIRUS virus THEN YES. YES.
 blonk291: Thank you :)
 lizard58: I'm going to rm you in a second.`,
 
-        "/home/logs/dir2.zip/log4-20-2024.txt": `lizard58: Alright it's done!
+        "/home/logs/secret.zip/log4-20-2024.txt": `lizard58: Alright it's done!
 blonk291: YES! THEY'LL NEVER KNOW WHO HIT EM!
 lizard58: The articles will be CRAZY after this one.
 lizard58: We should lock them up in case our logs get out.

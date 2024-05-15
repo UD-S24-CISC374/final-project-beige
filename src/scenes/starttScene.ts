@@ -935,13 +935,13 @@ export default class StartScene extends Phaser.Scene {
         // Call CAT's chiming in
         if (Object.values(this.bubbleData)[0] > 25) {
             console.log("COMMAND COUNTER: ", this.commandCount);
-            console.log("RM.TXT: ", CATFS.exists("/home/logs/dir2/rm.txt"));
+            console.log("RM.TXT: ", CATFS.exists("/home/logs/secret/rm.txt"));
             console.log("REDLOCK: ", !CATFS.exists("/redlock.lock"));
             // check for a specific thing from each task
             //TASK 5 HINT
             if (
                 this.commandCount % 7 === 0 &&
-                CATFS.exists("/home/logs/dir2.zip")
+                CATFS.exists("/home/logs/secret.zip")
             ) {
                 this.bubbleData = {
                     //2000 is an arbitrary number just to make sure the player doesn't spam click to get to CAT's next Undertale-style switch case
@@ -951,7 +951,7 @@ export default class StartScene extends Phaser.Scene {
                 // TASK 6 HINT
             } else if (
                 this.commandCount % 13 === 0 &&
-                CATFS.exists("/home/logs/dir2/rm.txt") &&
+                CATFS.exists("/home/logs/secret/rm.txt") &&
                 !this.hint6
             ) {
                 this.bubbleData = {
