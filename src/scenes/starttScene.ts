@@ -14,6 +14,7 @@ export default class StartScene extends Phaser.Scene {
     commandCount: number;
     hint6: boolean;
     puterFlag: number = 0;
+    passFlag: number = 0;
     terminalHistory: string[] = [];
     terminalHistoryIndex: number = 0;
     CAT: Phaser.GameObjects.Sprite;
@@ -94,9 +95,9 @@ export default class StartScene extends Phaser.Scene {
                 }
                 // CYCLE DIALOGUE HERE
                 if (
-                    (objectsClicked.length > 0 &&
-                        objectsClicked[0].texture.key === "CAT") ||
-                    objectsClicked[0].texture.key === "CATputer"
+                    objectsClicked.length > 0 &&
+                    (objectsClicked[0].texture.key === "CAT" ||
+                        objectsClicked[0].texture.key === "CATputer")
                 ) {
                     this.cycleDialogue(
                         Object.values(this.bubbleData)[0],
@@ -122,13 +123,13 @@ export default class StartScene extends Phaser.Scene {
                         if (CATFS.exists("/project/1100/cat.zip")) {
                             makeTxtFile(
                                 CATFS.readFile(
-                                    "/project/1100/cat.zip/cat/find_me.txt",
+                                    "/project/1100/cat.zip/terminal0/find_me.txt",
                                 ),
                             );
                         } else {
                             makeTxtFile(
                                 CATFS.readFile(
-                                    "/project/1100/cat/cat/find_me.txt",
+                                    "/project/1100/cat/terminal0/find_me.txt",
                                 ),
                             );
                         }
@@ -215,7 +216,10 @@ export default class StartScene extends Phaser.Scene {
             if (event.code === "Enter") {
                 blip.play();
 
-                const text = escapeHTML(terminalInput.value.trim()).replaceAll('"', "");
+                const text = escapeHTML(terminalInput.value.trim()).replaceAll(
+                    '"',
+                    "",
+                );
                 if (
                     this.terminalHistory.length === 0 ||
                     (this.terminalHistory.length > 0 &&
@@ -234,7 +238,8 @@ export default class StartScene extends Phaser.Scene {
                 setInputText("");
             } else if (event.code === "ArrowUp") {
                 if (
-                    this.terminalHistory.length - this.terminalHistoryIndex > 0
+                    this.terminalHistory.length - this.terminalHistoryIndex >
+                    0
                 ) {
                     this.terminalHistoryIndex++;
                     setInputText(
@@ -274,7 +279,8 @@ export default class StartScene extends Phaser.Scene {
         // -- Current Directory
         const terminalCurrentDirectory = document.createElement("p");
         terminalCurrentDirectory.id = "terminal-current-directory";
-        terminalCurrentDirectory.className = "jetbrains-mono-normal terminal-span-dir-color";
+        terminalCurrentDirectory.className =
+            "jetbrains-mono-normal terminal-span-dir-color";
         // -- Background
         this.add.rectangle(
             terminalWidth / 2 + 2,
@@ -289,19 +295,12 @@ export default class StartScene extends Phaser.Scene {
             720 - terminalHeight / 2 - terminalInputHeight / 2,
             terminalHistoryParent,
         );
-        const terminalCWDElement = this.add.dom(
-            0,
-            0,
-            terminalCurrentDirectory,
-        );
-        const terminalInputElement = this.add.dom(
-            0,
-            0,
-            terminalInput,
-        );
+        const terminalCWDElement = this.add.dom(0, 0, terminalCurrentDirectory);
+        const terminalInputElement = this.add.dom(0, 0, terminalInput);
         // -- Current Directory
         CATFS.registerCWDChangeCallback((newCWD) => {
-            terminalCurrentDirectory.innerText = (newCWD != "/" ? newCWD : "") + "/\u200b>";
+            terminalCurrentDirectory.innerText =
+                (newCWD != "/" ? newCWD : "") + "/\u200b>";
             terminalCWDElement.setPosition(
                 0,
                 720 - terminalInputHeight / 2 - 16,
@@ -914,7 +913,9 @@ export default class StartScene extends Phaser.Scene {
             return;
         }
 
-        const terminalHistory = document.getElementById("terminal-history-parent");
+        const terminalHistory = document.getElementById(
+            "terminal-history-parent",
+        );
         if (!terminalHistory) {
             return;
         }
@@ -927,7 +928,9 @@ export default class StartScene extends Phaser.Scene {
         };
 
         text = text.trim();
-        addOutput(`<span class="terminal-span-input-color">&gt; ${text}</span>`);
+        addOutput(
+            `<span class="terminal-span-input-color">&gt; ${text}</span>`,
+        );
 
         // Call CAT's chiming in
         if (Object.values(this.bubbleData)[0] > 25) {
@@ -1039,11 +1042,65 @@ export default class StartScene extends Phaser.Scene {
             }
             case "cd": {
                 if (!CATFS.isDir(commandParts[1])) {
-                    addOutput(`Command "cd" could not find a directory called "${commandParts[1]}".`);
+                    addOutput(
+                        `Command "cd" could not find a directory called "${commandParts[1]}".`,
+                    );
+                    return;
+                } else {
+                    if (
+                        CATFS.exists(commandParts[1]) &&
+                        commandParts[1].includes("project") &&
+                        commandParts.length < 3 &&
+                        this.passFlag < 1
+                    ) {
+                        addOutput(`
+---WARNING---
+This directory is password protected.
+
+To open it, add "-p PASSWORD" to the end of your command.
+
+Example: cd project -p myPassword
+    would work if your password was "myPassword"
+
+Hint: Name of The Hacker. (All Caps)`);
+                    } else if (
+                        CATFS.exists(commandParts[1]) &&
+                        commandParts[1].includes("1100") &&
+                        commandParts.length < 3 &&
+                        this.passFlag < 2
+                    ) {
+                        addOutput(`
+---WARNING---
+This directory is password protected.
+
+Hint: I
+      M
+      P
+      O
+      R
+      T
+      A
+      N
+      T`);
+                    } else if (
+                        commandParts[1].includes("project") &&
+                        commandParts[2] === "-p" &&
+                        commandParts[3] === "ZERO"
+                    ) {
+                        this.passFlag = 1;
+                        CATFS.cwd = commandParts[1];
+                    } else if (
+                        commandParts[1].includes("1100") &&
+                        commandParts[2] === "-p" &&
+                        commandParts[3] === "HIGHRISE"
+                    ) {
+                        this.passFlag = 2;
+                        CATFS.cwd = commandParts[1];
+                    } else {
+                        CATFS.cwd = commandParts[1];
+                    }
                     return;
                 }
-                CATFS.cwd = commandParts[1];
-                return;
             }
             case "echo": {
                 addOutput(text.substring(4));
