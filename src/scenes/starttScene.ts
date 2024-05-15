@@ -94,8 +94,9 @@ export default class StartScene extends Phaser.Scene {
                 }
                 // CYCLE DIALOGUE HERE
                 if (
-                    objectsClicked.length > 0 &&
-                    objectsClicked[0].texture.key === "CAT"
+                    (objectsClicked.length > 0 &&
+                        objectsClicked[0].texture.key === "CAT") ||
+                    objectsClicked[0].texture.key === "CATputer"
                 ) {
                     this.cycleDialogue(
                         Object.values(this.bubbleData)[0],
@@ -743,6 +744,7 @@ export default class StartScene extends Phaser.Scene {
                 Object.values(showBubble)[1].visible = true;
                 // add objective text under cat
                 this.setObjective("Use what you learned in baller.txt");
+                this.puterFlag = true;
                 break;
             case 25:
                 showBubble = this.createSpeechBubble(
@@ -827,6 +829,8 @@ export default class StartScene extends Phaser.Scene {
     ) {
         if (!this.puterFlag) {
             this.CAT.play("talk");
+        } else {
+            this.CAT.setTexture("CATputer");
         }
 
         const bubbleWidth = width;
