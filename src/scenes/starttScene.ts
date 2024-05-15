@@ -13,7 +13,7 @@ export default class StartScene extends Phaser.Scene {
     lastOutput: string;
     commandCount: number;
     hint6: boolean;
-    puterFlag: boolean = false;
+    puterFlag: number = 0;
     terminalHistory: string[] = [];
     terminalHistoryIndex: number = 0;
     CAT: Phaser.GameObjects.Sprite;
@@ -744,7 +744,7 @@ export default class StartScene extends Phaser.Scene {
                 Object.values(showBubble)[1].visible = true;
                 // add objective text under cat
                 this.setObjective("Use what you learned in baller.txt");
-                this.puterFlag = true;
+                this.puterFlag = 1;
                 break;
             case 25:
                 showBubble = this.createSpeechBubble(
@@ -827,10 +827,12 @@ export default class StartScene extends Phaser.Scene {
         height: number,
         quote: string,
     ) {
-        if (!this.puterFlag) {
+        if (this.puterFlag == 0) {
             this.CAT.play("talk");
-        } else {
+        } else if (this.puterFlag == 1) {
             this.CAT.setTexture("CATputer");
+        } else {
+            this.CAT.setTexture("deadCAT");
         }
 
         const bubbleWidth = width;
@@ -1064,6 +1066,7 @@ export default class StartScene extends Phaser.Scene {
                     CATFS.deleteFile(commandParts[1]);
                     if (commandParts[1].endsWith("cat.exe")) {
                         this.CAT.setTexture("deadCAT");
+                        this.puterFlag = 2;
                         //this.scene.stop();
                         //this.scene.start("EndScene");
                     } else if (commandParts[1].endsWith("redlock.lock")) {
