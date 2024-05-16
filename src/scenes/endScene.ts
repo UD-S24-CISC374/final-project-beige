@@ -9,7 +9,10 @@ export default class EndScene extends Phaser.Scene {
     }
 
     create() {
-        this.add.image(650, 350, "end");
+        let black = this.add.image(650, 350, "trueEnd");
+        black.scale = 2;
+        black.setTint(0x000000);
+        this.add.image(650, 350, "trueEnd");
         //input
     }
 

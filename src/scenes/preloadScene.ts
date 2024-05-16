@@ -8,6 +8,7 @@ export default class PreloadScene extends Phaser.Scene {
     preload() {
         this.load.image("title", "assets/img/title.png");
         this.load.image("end", "assets/img/end.png");
+        this.load.image("trueEnd", "assets/img/finale.png");
         this.load.image("desktopBG", "assets/img/xpbg.jpg");
         this.load.image("CAT", "assets/img/CAT shadeless-export big.png");
         this.load.image("deadCAT", "assets/img/dead CAT final ver.png");
@@ -26,6 +27,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.audio("lockedfile", "assets/sounds/hitnoise.mp3");
         this.load.audio("blip", "assets/sounds/blip.mp3");
         this.load.audio("pop", "assets/sounds/pop.mp3");
+        this.load.audio("boom", "assets/sounds/boomupdated.mp3");
         this.load.audio("background", "assets/sounds/background.mp3");
     }
 

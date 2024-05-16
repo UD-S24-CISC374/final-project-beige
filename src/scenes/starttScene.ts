@@ -13,6 +13,7 @@ export default class StartScene extends Phaser.Scene {
     lastOutput: string;
     commandCount: number;
     hint6: boolean;
+    sudoFlag: boolean;
     puterFlag: number = 0;
     passFlag: number = 0;
     terminalHistory: string[] = [];
@@ -1114,10 +1115,11 @@ Hint: I
                 return;
             }
             case "sudo": {
-                if (commandParts[1] === "su") {
-                    addOutput(
-                        "NOT IMPLEMENTED IN THE BETA, JUST RM CAT.EXE TO WIN",
-                    );
+                if (commandParts[1] === "su" && !this.sudoFlag) {
+                    addOutput("Administrator Permissions Granted.");
+                    this.sudoFlag = true;
+                } else if (commandParts[1] === "su" && this.sudoFlag) {
+                    addOutput("Already Administrator Role.");
                 } else {
                     addOutput(
                         `Unknown command "${commandParts[0]} ${commandParts[1]}".`,
@@ -1136,13 +1138,18 @@ Hint: I
             }
             case "rm": {
                 if (CATFS.isFile(commandParts[1])) {
-                    CATFS.deleteFile(commandParts[1]);
                     if (commandParts[1].endsWith("cat.exe")) {
-                        this.CAT.setTexture("deadCAT");
-                        this.puterFlag = 2;
-                        //this.scene.stop();
-                        //this.scene.start("EndScene");
+                        if (this.sudoFlag) {
+                            this.CAT.setTexture("deadCAT");
+                            this.puterFlag = 2;
+                            let boom = this.sound.add("boom");
+                            boom.play();
+                            CATFS.deleteFile(commandParts[1]);
+                        } else {
+                            addOutput("Permission Denied.");
+                        }
                     } else if (commandParts[1].endsWith("redlock.lock")) {
+                        CATFS.deleteFile(commandParts[1]);
                         console.log("REMOVE RED LOCKS HERE");
                         this.hackArticle.destroy();
                         this.findMe.destroy();
@@ -1152,6 +1159,8 @@ Hint: I
                         this.findMe = this.add
                             .image(200, 100, "unlocked text")
                             .setInteractive();
+                    } else {
+                        CATFS.deleteFile(commandParts[1]);
                     }
                 } else if (CATFS.isDir(commandParts[1])) {
                     addOutput(
@@ -1187,6 +1196,18 @@ Hint: I
     }
 
     update() {
-        //this.fpsText.update();
+        if (
+            this.puterFlag == 2 &&
+            this.CAT.alpha > 0 &&
+            this.CAT.scaleX < 100
+        ) {
+            this.CAT.scaleX++;
+            this.CAT.scaleY++;
+            this.CAT.alpha -= 0.015;
+        }
+        if (this.CAT.alpha <= 0) {
+            this.scene.stop();
+            this.scene.start("EndScene");
+        }
     }
 }
