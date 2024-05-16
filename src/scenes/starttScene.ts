@@ -1138,17 +1138,18 @@ Hint: I
             }
             case "rm": {
                 if (CATFS.isFile(commandParts[1])) {
-                    CATFS.deleteFile(commandParts[1]);
                     if (commandParts[1].endsWith("cat.exe")) {
                         if (this.sudoFlag) {
                             this.CAT.setTexture("deadCAT");
                             this.puterFlag = 2;
                             let boom = this.sound.add("boom");
                             boom.play();
+                            CATFS.deleteFile(commandParts[1]);
                         } else {
                             addOutput("Permission Denied.");
                         }
                     } else if (commandParts[1].endsWith("redlock.lock")) {
+                        CATFS.deleteFile(commandParts[1]);
                         console.log("REMOVE RED LOCKS HERE");
                         this.hackArticle.destroy();
                         this.findMe.destroy();
@@ -1158,6 +1159,8 @@ Hint: I
                         this.findMe = this.add
                             .image(200, 100, "unlocked text")
                             .setInteractive();
+                    } else {
+                        CATFS.deleteFile(commandParts[1]);
                     }
                 } else if (CATFS.isDir(commandParts[1])) {
                     addOutput(
