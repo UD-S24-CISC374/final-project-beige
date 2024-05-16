@@ -1057,11 +1057,13 @@ export default class StartScene extends Phaser.Scene {
                 } else {
                     if (
                         CATFS.exists(commandParts[1]) &&
-                        commandParts[1].includes("project") &&
-                        commandParts.length < 3 &&
-                        this.passFlag < 1
+                        commandParts[1].includes("project")
                     ) {
-                        addOutput(`
+                        if (this.passFlag > 0) {
+                            CATFS.cwd = commandParts[1];
+                        } else {
+                            if (commandParts.length != 4) {
+                                addOutput(`
 ---WARNING---
 This directory is password protected.
 
@@ -1071,13 +1073,33 @@ Example: cd project -p myPassword
     would work if your password was "myPassword"
 
 Hint: Name of The Hacker. (All Caps)`);
+                            } else {
+                                if (
+                                    commandParts[2] === "-p" &&
+                                    commandParts[3] === "ZERO"
+                                ) {
+                                    this.passFlag = 1;
+                                    CATFS.cwd = commandParts[1];
+                                    addOutput("Password Accepted.");
+                                } else if (
+                                    commandParts[2] === "-p" &&
+                                    commandParts[3] !== "ZERO"
+                                ) {
+                                    addOutput("Incorrect Password.");
+                                } else {
+                                    addOutput("Incorrect Password Format.");
+                                }
+                            }
+                        }
                     } else if (
                         CATFS.exists(commandParts[1]) &&
-                        commandParts[1].includes("1100") &&
-                        commandParts.length < 3 &&
-                        this.passFlag < 2
+                        commandParts[1].includes("1100")
                     ) {
-                        addOutput(`
+                        if (this.passFlag > 1) {
+                            CATFS.cwd = commandParts[1];
+                        } else {
+                            if (commandParts.length != 4) {
+                                addOutput(`
 ---WARNING---
 This directory is password protected.
 
@@ -1090,20 +1112,24 @@ Hint: I
       A
       N
       T`);
-                    } else if (
-                        commandParts[1].includes("project") &&
-                        commandParts[2] === "-p" &&
-                        commandParts[3] === "ZERO"
-                    ) {
-                        this.passFlag = 1;
-                        CATFS.cwd = commandParts[1];
-                    } else if (
-                        commandParts[1].includes("1100") &&
-                        commandParts[2] === "-p" &&
-                        commandParts[3] === "HIGHRISE"
-                    ) {
-                        this.passFlag = 2;
-                        CATFS.cwd = commandParts[1];
+                            } else {
+                                if (
+                                    commandParts[2] === "-p" &&
+                                    commandParts[3] === "HIGHRISE"
+                                ) {
+                                    this.passFlag = 2;
+                                    CATFS.cwd = commandParts[1];
+                                    addOutput("Password Accepted.");
+                                } else if (
+                                    commandParts[2] === "-p" &&
+                                    commandParts[3] !== "HIGHRISE"
+                                ) {
+                                    addOutput("Incorrect Password.");
+                                } else {
+                                    addOutput("Incorrect Password Format.");
+                                }
+                            }
+                        }
                     } else {
                         CATFS.cwd = commandParts[1];
                     }

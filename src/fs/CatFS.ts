@@ -273,9 +273,9 @@ You ever feel trapped in a directory? With no way to get out?
 Well boy do I have a command for you!
 INTRODUCING "cd .." This will change your directory to the one you were in previously! Incredible!
 
-You ever encounter a directory that ends in .zip? With no way to open it?
+You ever encounter a file that ends in .zip? With no way to open it?
 Well girl do I have a command for you!
-INTRODUCING "unzip DIRECTORY.zip" This will unzip that directory so you can get to explorin it!`,
+INTRODUCING "unzip DIRECTORY.zip" This will unzip that file so you can get to explorin it!`,
 
         "/home/logs/secret.zip/rm.txt": `blonk291: Duuuuuuuuuuuuuuuude I accidentally made a virus.
 lizard58: HOW DO YOU JUST *MAKE* A VIRUS???
@@ -338,7 +338,7 @@ Here i can write whatever i want for you :)
 Real talk though, you need a password.
 I think i can help you with that.
 See this text? The password is these lines.
-Enter it to gain access to the 0011 directory!`,
+Enter it to gain access to the 1100 directory!`,
 
         "/project/1100/entry3PARTA.txt": `The good part about being in a computer is that everything makes sense. 
 Everything is just data. I'M just data. 
