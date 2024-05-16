@@ -275,7 +275,7 @@ INTRODUCING "cd .." This will change your directory to the one you were in previ
 
 You ever encounter a file that ends in .zip? With no way to open it?
 Well girl do I have a command for you!
-INTRODUCING "unzip DIRECTORY.zip" This will unzip that file so you can get to explorin it!`,
+INTRODUCING "unzip FILE.zip" This will unzip that file so you can get to explorin it!`,
 
         "/home/logs/secret.zip/rm.txt": `blonk291: Duuuuuuuuuuuuuuuude I accidentally made a virus.
 lizard58: HOW DO YOU JUST *MAKE* A VIRUS???
