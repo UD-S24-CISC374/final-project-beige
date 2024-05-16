@@ -44,7 +44,9 @@ export class CatFS {
     registerCWDChangeCallback(callback: CatFSCWDChangeCallback): void {
         callback(this.cwd);
         // HACK: need to run this twice to properly set HTML values
-        setTimeout(() => { callback(this.cwd); }, 100);
+        setTimeout(() => {
+            callback(this.cwd);
+        }, 100);
         this.#cwdChangeCallbacks.push(callback);
     }
 
@@ -241,8 +243,9 @@ export class CatFS {
     }
 }
 
-export const CATFS = new CatFS({
-    "/home/instructions.txt": `Let's learn some commands!
+export const CATFS = new CatFS(
+    {
+        "/home/instructions.txt": `Let's learn some commands!
 
 echo TEXT: Have the terminal 'say' the TEXT that you enter.
         Ex: "echo haha" would make the terminal say "haha"
@@ -253,7 +256,7 @@ cat FILE: Read a FILE that you choose in the terminal!
 
 ls: Lists everything in your current directory!`,
 
-    "/home/logs/log4-15-2024.txt": `blonk291: Can we really do this? That's awesome!
+        "/home/logs/log4-15-2024.txt": `blonk291: Can we really do this? That's awesome!
 lizard58: Of course we can, we'll just need a name.
 lizard58: There's no way we can get caught.
 blonk291: But we need justice for our friend.
@@ -264,7 +267,7 @@ blonk291: Man I wanna pick the name, Im great at naming things.
 lizard58: No way am I letting you name our alias.
 lizard58: You'll name us a number or something stupid.`,
 
-    "/home/logs/baller.txt": `It's time to learn some BALLER techniques.
+        "/home/logs/baller.txt": `It's time to learn some BALLER techniques.
 
 You ever feel trapped in a directory? With no way to get out?
 Well boy do I have a command for you!
@@ -274,7 +277,7 @@ You ever encounter a directory that ends in .zip? With no way to open it?
 Well girl do I have a command for you!
 INTRODUCING "unzip DIRECTORY.zip" This will unzip that directory so you can get to explorin it!`,
 
-    "/home/logs/dir2.zip/rm.txt": `blonk291: Duuuuuuuuuuuuuuuude I accidentally made a virus.
+        "/home/logs/secret.zip/rm.txt": `blonk291: Duuuuuuuuuuuuuuuude I accidentally made a virus.
 lizard58: HOW DO YOU JUST *MAKE* A VIRUS???
 blonk291: Idk dude but I need to remove it STAT.
 lizard58: Ohhhhhhhhh boy ok. Use the rm command.
@@ -285,7 +288,7 @@ lizard58: IF YOU ACTUALLY NAMED YOUR VIRUS virus THEN YES. YES.
 blonk291: Thank you :)
 lizard58: I'm going to rm you in a second.`,
 
-    "/home/logs/dir2.zip/log4-20-2024.txt": `lizard58: Alright it's done!
+        "/home/logs/secret.zip/log4-20-2024.txt": `lizard58: Alright it's done!
 blonk291: YES! THEY'LL NEVER KNOW WHO HIT EM!
 lizard58: The articles will be CRAZY after this one.
 lizard58: We should lock them up in case our logs get out.
@@ -294,7 +297,7 @@ lizard58: Ok I'll leave it to you, we just have to hope no one gets rid of it.
 blonk291: Nah that would never happen, I'll hide it somewhere far from here.
 blonk291: It's in a different directory, one you might not have seen yet.`,
 
-    "/project/1100/cat.zip/cat/find_me.txt": `If you see this, please find me.
+        "/project/1100/cat.zip/terminal0/find_me.txt": `If you see this, please find me.
 
 Everything in this terminal is not how it seems...
 
@@ -302,9 +305,9 @@ They've locked me behind several passwords, the answers are in the files.
 
 I'm at the source... the corruption...`,
 
-    "/project/1100/cat.zip/cat/cat.exe": ``,
+        "/project/1100/cat.zip/terminal0/cat.exe": ``,
 
-    "/project/1100/cat.zip/cat/help.txt": `Good! You found the direcctory!
+        "/project/1100/cat.zip/terminal0/help.txt": `Good! You found the directory!
 In here is the entirety of CAT's code.
 I've tried to delete CAT but I lacked admin permissions to do so...
 I think the command to gain these permissions is... "sudo su"
@@ -313,22 +316,22 @@ it will be too late for me.
 
 Please do what must be done, remove them at last.`,
 
-    "/redlock.lock": '',
+        "/redlock.lock": "",
 
-    "/project/entry1.txt": `I can't tell what's happened. It's like I have no eyes, yet I can see. 
+        "/project/entry1.txt": `I can't tell what's happened. It's like I have no eyes, yet I can see. 
 I have no hands, but I can type. I have no body, but I can move. Moving doesn't feel right. 
 I can't see my own hands. I have no physical form. The plane is 2D. 
 
 Where am I??`,
 
-    "/project/trash/entry2.txt": `A computer. The answer is I'm in a computer. 
+        "/project/trash/entry2.txt": `A computer. The answer is I'm in a computer. 
 This is incredibly ironic, maybe even funny, but I've got to find a way out. I don't have a lot of permissions or access rights 
 so I'll have to do what I can to get around that. This has to be some sort of divine punishment. Perhaps I died and I'm now 
 like... a cyber angel, destined to flitter around on unseen wings in front of those blissful Windows XP hills.
 
 They will regret putting me in here.`,
 
-    "/project/trash/important.txt": `Hey you! yeah you!
+        "/project/trash/important.txt": `Hey you! yeah you!
 I thought this would be fun to write so here you are
 Guess it paid off since you're reading it!
 Here i can write whatever i want for you :)
@@ -337,14 +340,14 @@ I think i can help you with that.
 See this text? The password is these lines.
 Enter it to gain access to the 0011 directory!`,
 
-    "/project/1100/entry3PARTA.txt": `The good part about being in a computer is that everything makes sense. 
+        "/project/1100/entry3PARTA.txt": `The good part about being in a computer is that everything makes sense. 
 Everything is just data. I'M just data. 
 
 That was their first mistake. You can't KILL data. Even if deleted, it remains somewhere in cache, memory, whatever. Traces of data are left on the hardware, 
 waiting to be put back together. Sooo I'm technically immortal now. I can't die, but I can't put myself back together either. 
 It'd be like some weird purgatory, I guess. There are consequences to being immortal.`,
 
-    "/project/1100/entry3PARTB.txt": `...but not for me!! If I can turn my consciousness into a virus that spreads 
+        "/project/1100/entry3PARTB.txt": `...but not for me!! If I can turn my consciousness into a virus that spreads 
 over a network, then I'll be able to infect every computer in the entire world. I'll be immortal and whole FOREVER. 
 So much of the world relies on computers that I'll control everything and nobody will ever know.
 
@@ -353,6 +356,7 @@ No, patient 0? Terminal 0?
 
 I'll, um, I'll keep working on it.`,
 
-    "/project/1100/entry4.txt": `Alright. I've placed my data in a secured folder. Aka: a password is required. I don't have a lot of permissions still, but enough progress has been made for me to password protect files. Some idiot has been poking around the computer. I've just been distracting them with random, nonsensical tasks. I'm not even sure why they were hired; they clearly don't know what's wrong with the computer. I haven't seen a single anti-virus program run even ONCE. I'm not telling them about antivirus either. While they're busy, I'll continue chipping away at the security of this system. The virus is almost complete; I just need this computer to stay on long enough for me to finish it.`,
-
-}, "/home");
+        "/project/1100/entry4.txt": `Alright. I've placed my data in a secured folder. Aka: a password is required. I don't have a lot of permissions still, but enough progress has been made for me to password protect files. Some idiot has been poking around the computer. I've just been distracting them with random, nonsensical tasks. I'm not even sure why they were hired; they clearly don't know what's wrong with the computer. I haven't seen a single anti-virus program run even ONCE. I'm not telling them about antivirus either. While they're busy, I'll continue chipping away at the security of this system. The virus is almost complete; I just need this computer to stay on long enough for me to finish it.`,
+    },
+    "/home",
+);
