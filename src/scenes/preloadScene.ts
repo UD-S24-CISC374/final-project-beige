@@ -26,6 +26,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.audio("lockedfile", "assets/sounds/hitnoise.mp3");
         this.load.audio("blip", "assets/sounds/blip.mp3");
         this.load.audio("pop", "assets/sounds/pop.mp3");
+        this.load.audio("boom", "assets/sounds/boom.mp3");
         this.load.audio("background", "assets/sounds/background.mp3");
     }
 

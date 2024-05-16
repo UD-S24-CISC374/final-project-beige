@@ -1140,6 +1140,8 @@ Hint: I
                     if (commandParts[1].endsWith("cat.exe")) {
                         this.CAT.setTexture("deadCAT");
                         this.puterFlag = 2;
+                        let boom = this.sound.add("boom");
+                        boom.play();
                         //this.scene.stop();
                         //this.scene.start("EndScene");
                     } else if (commandParts[1].endsWith("redlock.lock")) {
@@ -1187,6 +1189,14 @@ Hint: I
     }
 
     update() {
-        //this.fpsText.update();
+        if (
+            this.puterFlag == 2 &&
+            this.CAT.alpha > 0 &&
+            this.CAT.scaleX < 100
+        ) {
+            this.CAT.scaleX++;
+            this.CAT.scaleY++;
+            this.CAT.alpha -= 0.015;
+        }
     }
 }
