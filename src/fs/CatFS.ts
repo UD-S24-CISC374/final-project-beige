@@ -293,7 +293,7 @@ blonk291: YES! THEY'LL NEVER KNOW WHO HIT EM!
 lizard58: The articles will be CRAZY after this one.
 lizard58: We should lock them up in case our logs get out.
 blonk291: Ooh ooh! Ok I'll make a program that can lock it!
-lizard58: Ok I'll leave it to you, we just have to hope no one gets rid of it.
+lizard58: Ok I'll leave it to you, we just have to hope no one gets removes it.
 blonk291: Nah that would never happen, I'll hide it somewhere far from here.
 blonk291: It's in a different directory, one you might not have seen yet.`,
 
