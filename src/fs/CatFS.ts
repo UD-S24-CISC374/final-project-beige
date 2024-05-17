@@ -273,9 +273,9 @@ You ever feel trapped in a directory? With no way to get out?
 Well boy do I have a command for you!
 INTRODUCING "cd .." This will change your directory to the one you were in previously! Incredible!
 
-You ever encounter a directory that ends in .zip? With no way to open it?
+You ever encounter a file that ends in .zip? With no way to open it?
 Well girl do I have a command for you!
-INTRODUCING "unzip DIRECTORY.zip" This will unzip that directory so you can get to explorin it!`,
+INTRODUCING "unzip FILE.zip" This will unzip that file so you can get to explorin it!`,
 
         "/home/logs/secret.zip/rm.txt": `blonk291: Duuuuuuuuuuuuuuuude I accidentally made a virus.
 lizard58: HOW DO YOU JUST *MAKE* A VIRUS???
@@ -292,8 +292,8 @@ lizard58: I'm going to rm you in a second.`,
 blonk291: YES! THEY'LL NEVER KNOW WHO HIT EM!
 lizard58: The articles will be CRAZY after this one.
 lizard58: We should lock them up in case our logs get out.
-blonk291: Ooh ooh! Ok I'll make a program that can lock it!
-lizard58: Ok I'll leave it to you, we just have to hope no one gets rid of it.
+blonk291: Ok I'll make a program that can lock it! It'll end in .lock
+lizard58: I'll leave it to you, we just have to hope no one gets removes it.
 blonk291: Nah that would never happen, I'll hide it somewhere far from here.
 blonk291: It's in a different directory, one you might not have seen yet.`,
 
@@ -308,8 +308,8 @@ I'm at the source... the corruption...`,
         "/project/1100/cat.zip/terminal0/cat.exe": ``,
 
         "/project/1100/cat.zip/terminal0/help.txt": `Good! You found the directory!
-In here is the entirety of CAT's code.
-I've tried to delete CAT but I lacked admin permissions to do so...
+In here is the entirety of CAT's code... The virus...
+I've tried to remove cat.exe but I lacked admin permissions to do so...
 I think the command to gain these permissions is... "sudo su"
 I cannot try myself as I've already failed and by the time you see this,
 it will be too late for me.
@@ -338,7 +338,7 @@ Here i can write whatever i want for you :)
 Real talk though, you need a password.
 I think i can help you with that.
 See this text? The password is these lines.
-Enter it to gain access to the 0011 directory!`,
+Enter it to gain access to the 1100 directory!`,
 
         "/project/1100/entry3PARTA.txt": `The good part about being in a computer is that everything makes sense. 
 Everything is just data. I'M just data. 
