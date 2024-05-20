@@ -1,3 +1,8 @@
+# IDE
+.idea/
+.vscode/
+
+# Build
 /.cache
 /dist
 /node_modules

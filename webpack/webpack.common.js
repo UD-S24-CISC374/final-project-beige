@@ -35,7 +35,7 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            gameName: "My Phaser Game",
+            gameName: "Terminal 0",
             template: "assets/index.html",
         }),
         new CopyWebpackPlugin({
